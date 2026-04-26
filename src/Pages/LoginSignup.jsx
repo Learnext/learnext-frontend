@@ -23,12 +23,12 @@ const LoginSignup = () => {
     try {
       // =============================================
       // [GIẢ LẬP] Dùng khi chưa có backend - xóa khi BE xong
-      //await new Promise((res) => setTimeout(res, 800));
-      //const data = { success: true, token: "fake-token-123" };
+      await new Promise((res) => setTimeout(res, 800));
+      const data = { success: true, token: "fake-token-123" };
       // =============================================
 
       // =============================================
-
+      /*
       const response = await fetch("http://localhost:5000/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -39,7 +39,7 @@ const LoginSignup = () => {
       });
       const data = await response.json();
       // =============================================
-
+*/
       if (data.success) {
         localStorage.setItem("auth-token", data.token);
         window.location.replace("/");
