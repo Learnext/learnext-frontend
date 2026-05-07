@@ -1,46 +1,84 @@
 import React, { useState } from "react";
 import "./Profile.css";
+import { useAuth } from "../../Context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
-// Mock user data - thay bằng API call thực tế
-const mockUser = {
-  username: "Nguyen Van A",
-  email: "nguyenvana@email.com",
-  phone: "0901234567",
-  role: "user", // "user" | "instructor"
-  avatar: null,
-  bio: "",
-  // instructor only
-  expertise: "",
-  courses_count: 0,
-};
+const API_URL = import.meta.env.VITE_API_URL;
 
 const Profile = () => {
-  const [user, setUser] = useState(mockUser);
+  const { user: authUser, login: authLogin } = useAuth();
+  const navigate = useNavigate();
+
   const [editing, setEditing] = useState(false);
-  const [formData, setFormData] = useState({ ...mockUser });
   const [saved, setSaved] = useState(false);
-  const [roleSwitch, setRoleSwitch] = useState(user.role); // demo role toggle
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const [formData, setFormData] = useState({
+    username: authUser?.username || "",
+    phone: authUser?.phone || "",
+    bio: authUser?.bio || "",
+    expertise: authUser?.expertise || "",
+  });
+
+  if (!authUser) {
+    navigate("/login");
+    return null;
+  }
 
   const changeHandler = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    setError("");
   };
 
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
-    setUser({ ...formData, role: roleSwitch });
-    setEditing(false);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
+    setLoading(true);
+    setError("");
+    try {
+      let updatedUser;
+
+      if (!API_URL) {
+        await new Promise((res) => setTimeout(res, 800));
+        updatedUser = { ...authUser, ...formData };
+      } else {
+        const response = await fetch(`${API_URL}/user/profile`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("auth-token")}`,
+          },
+          body: JSON.stringify(formData),
+        });
+        const data = await response.json();
+        if (!data.success) {
+          setError(data.message || "Cập nhật thất bại");
+          return;
+        }
+        updatedUser = { ...authUser, ...data.user };
+      }
+
+      authLogin(localStorage.getItem("auth-token"), updatedUser);
+      setEditing(false);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+    } catch (err) {
+      console.error(err);
+      setError("Không thể kết nối server");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleCancel = () => {
-    setFormData({ ...user });
+    setFormData({
+      username: authUser.username || "",
+      phone: authUser.phone || "",
+      bio: authUser.bio || "",
+      expertise: authUser.expertise || "",
+    });
     setEditing(false);
-  };
-
-  const handleRoleSwitch = (role) => {
-    setRoleSwitch(role);
-    setFormData({ ...formData, role });
+    setError("");
   };
 
   return (
@@ -50,16 +88,15 @@ const Profile = () => {
         <div className="profile-header">
           <div className="profile-avatar">
             <div className="avatar-circle">
-              {user.username ? user.username.charAt(0).toUpperCase() : "U"}
+              {authUser.username?.charAt(0).toUpperCase() || "U"}
             </div>
-            {editing && <button className="avatar-change-btn">Đổi ảnh</button>}
           </div>
           <div className="profile-header-info">
-            <h2>{user.username}</h2>
-            <span className={`role-badge role-${user.role}`}>
-              {user.role === "instructor" ? "Giảng viên" : "Học viên"}
+            <h2>{authUser.username}</h2>
+            <span className={`role-badge role-${authUser.role}`}>
+              {authUser.role === "instructor" ? "Giảng viên" : "Học viên"}
             </span>
-            <p className="profile-email">{user.email}</p>
+            <p className="profile-email">{authUser.email}</p>
           </div>
           {!editing && (
             <button className="btn-edit" onClick={() => setEditing(true)}>
@@ -68,28 +105,11 @@ const Profile = () => {
           )}
         </div>
 
-        {/* Role Switch - Demo only, in real app this comes from backend */}
-        <div className="role-switch-bar">
-          <span>Xem dưới vai trò:</span>
-          <div className="role-tabs">
-            <button
-              className={roleSwitch === "user" ? "active" : ""}
-              onClick={() => handleRoleSwitch("user")}
-            >
-              Học viên
-            </button>
-            <button
-              className={roleSwitch === "instructor" ? "active" : ""}
-              onClick={() => handleRoleSwitch("instructor")}
-            >
-              Giảng viên
-            </button>
-          </div>
-        </div>
-
+        {/* Thông báo */}
         {saved && (
           <div className="save-success">✓ Cập nhật thông tin thành công!</div>
         )}
+        {error && <div className="save-error">✕ {error}</div>}
 
         {/* Form */}
         <form className="profile-form" onSubmit={handleSave}>
@@ -117,17 +137,22 @@ const Profile = () => {
                 />
               </div>
             </div>
+
             <div className="form-group">
               <label>Email</label>
               <input
                 name="email"
-                value={formData.email}
-                onChange={changeHandler}
-                disabled={!editing}
+                value={authUser.email}
+                disabled={true}
                 type="email"
-                placeholder="Nhập email"
               />
+              {editing && (
+                <small style={{ color: "#aaa" }}>
+                  Email không thể thay đổi
+                </small>
+              )}
             </div>
+
             <div className="form-group">
               <label>Giới thiệu bản thân</label>
               <textarea
@@ -141,8 +166,8 @@ const Profile = () => {
             </div>
           </div>
 
-          {/* Instructor only section */}
-          {roleSwitch === "instructor" && (
+          {/* Instructor only */}
+          {authUser.role === "instructor" && (
             <div className="form-section instructor-section">
               <h3>Thông tin giảng viên</h3>
               <div className="form-group">
@@ -157,7 +182,9 @@ const Profile = () => {
               </div>
               <div className="instructor-stats">
                 <div className="stat-card">
-                  <span className="stat-number">{user.courses_count}</span>
+                  <span className="stat-number">
+                    {authUser.courses_count || 0}
+                  </span>
                   <span className="stat-label">Khóa học đã tạo</span>
                 </div>
                 <div className="stat-card">
@@ -172,28 +199,22 @@ const Profile = () => {
             </div>
           )}
 
-          {/* Buttons */}
           {editing && (
             <div className="form-actions">
               <button
                 type="button"
                 className="btn-cancel"
                 onClick={handleCancel}
+                disabled={loading}
               >
                 Hủy
               </button>
-              <button type="submit" className="btn-save">
-                Lưu thay đổi
+              <button type="submit" className="btn-save" disabled={loading}>
+                {loading ? "Đang lưu..." : "Lưu thay đổi"}
               </button>
             </div>
           )}
         </form>
-
-        {/* Change password */}
-        <div className="form-section password-section">
-          <h3>Bảo mật</h3>
-          <button className="btn-change-password">Đổi mật khẩu</button>
-        </div>
       </div>
     </div>
   );

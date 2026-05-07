@@ -1,12 +1,10 @@
 /* WRAPPER */
 .loginsignup {
-  min-height: 100vh; /* 🔥 quan trọng: không bị footer đè */
+  min-height: 100vh;
   background: #fce3fe;
-
   display: flex;
   justify-content: center;
   align-items: center;
-
   padding: 40px 20px;
   box-sizing: border-box;
 }
@@ -19,12 +17,17 @@
   padding: 40px 50px;
   border-radius: 12px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  font-family: "Poppins", sans-serif;
 }
 
 /* TITLE */
 .loginsignup-container h1 {
   margin-bottom: 20px;
   text-align: center;
+  font-family: "Poppins", sans-serif;
+  font-size: 26px;
+  font-weight: 700;
+  color: #171717;
 }
 
 /* INPUTS */
@@ -38,15 +41,23 @@
   height: 60px;
   width: 100%;
   padding: 0 16px;
-  border: 1px solid #ddd;
+  border: 1px solid #e3e3e3;
   border-radius: 8px;
   outline: none;
-  font-size: 16px;
-  transition: 0.2s;
+  font-size: 15px;
+  font-family: "Poppins", sans-serif;
+  color: #454545;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
 }
 
 .loginsignup-fields input:focus {
   border-color: #ff4141;
+}
+
+.loginsignup-fields input::placeholder {
+  color: #aaa;
+  font-family: "Poppins", sans-serif;
 }
 
 /* BUTTON */
@@ -58,20 +69,27 @@
   margin-top: 25px;
   border: none;
   border-radius: 8px;
-  font-size: 20px;
-  font-weight: 500;
+  font-size: 18px;
+  font-weight: 600;
+  font-family: "Poppins", sans-serif;
   cursor: pointer;
-  transition: 0.3s;
+  transition: background 0.3s;
 }
 
 .loginsignup-container button:hover {
   background: #e63a3a;
 }
 
-/* LOGIN TEXT */
+.loginsignup-container button:disabled {
+  background: #f09090;
+  cursor: not-allowed;
+}
+
+/* SWITCH TEXT */
 .loginsignup-login {
   margin-top: 18px;
-  font-size: 16px;
+  font-size: 15px;
+  font-family: "Poppins", sans-serif;
   color: #777;
 }
 
@@ -87,12 +105,18 @@
   align-items: flex-start;
   gap: 10px;
   margin-top: 20px;
+  font-family: "Poppins", sans-serif;
   color: #777;
-  font-size: 14px;
+  font-size: 13px;
 }
 
-.loginsignup-agree input {
-  margin-top: 4px;
+.loginsignup-agree input[type="checkbox"] {
+  margin-top: 3px;
+  accent-color: #ff4141;
+}
+
+.loginsignup-agree p {
+  font-family: "Poppins", sans-serif;
 }
 
 /* RESPONSIVE */
@@ -107,6 +131,6 @@
 
   .loginsignup-container button {
     height: 50px;
-    font-size: 18px;
+    font-size: 16px;
   }
 }

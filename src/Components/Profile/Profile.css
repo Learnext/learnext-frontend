@@ -4,8 +4,9 @@
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  padding: 120px 20px 60px; /* 120px top vì navbar fixed */
+  padding: 120px 20px 60px;
   box-sizing: border-box;
+  font-family: "Poppins", sans-serif; /* ← root, cascade xuống toàn bộ */
 }
 
 .profile-container {
@@ -38,6 +39,7 @@
   justify-content: center;
   font-size: 28px;
   font-weight: 700;
+  font-family: "Poppins", sans-serif;
   flex-shrink: 0;
 }
 
@@ -59,6 +61,7 @@
   font-weight: 600;
   color: #171717;
   margin: 0 0 6px;
+  font-family: "Poppins", sans-serif;
 }
 
 .role-badge {
@@ -67,6 +70,7 @@
   border-radius: 75px;
   font-size: 13px;
   font-weight: 500;
+  font-family: "Poppins", sans-serif;
   margin-bottom: 4px;
 }
 .role-badge.role-user {
@@ -82,6 +86,7 @@
 .profile-email {
   font-size: 14px;
   color: #626262;
+  font-family: "Poppins", sans-serif;
   margin: 0;
 }
 
@@ -112,6 +117,7 @@
   border-bottom: 1px solid #e3e3e3;
   font-size: 14px;
   color: #626262;
+  font-family: "Poppins", sans-serif;
 }
 
 .role-tabs {
@@ -149,6 +155,7 @@
   border-radius: 8px;
   font-size: 14px;
   font-weight: 500;
+  font-family: "Poppins", sans-serif;
 }
 
 /* Form */
@@ -171,6 +178,7 @@
   margin: 0 0 18px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  font-family: "Poppins", sans-serif;
 }
 
 .form-row {
@@ -193,6 +201,7 @@
   font-size: 13px;
   font-weight: 500;
   color: #616161;
+  font-family: "Poppins", sans-serif;
 }
 
 .form-group input,
@@ -251,12 +260,14 @@
   font-size: 26px;
   font-weight: 700;
   color: #ff4141;
+  font-family: "Poppins", sans-serif;
 }
 
 .stat-label {
   display: block;
   font-size: 12px;
   color: #616161;
+  font-family: "Poppins", sans-serif;
   margin-top: 4px;
 }
 
@@ -312,6 +323,7 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
   margin-bottom: 16px;
+  font-family: "Poppins", sans-serif;
 }
 
 .btn-change-password {

@@ -1,10 +1,17 @@
 import React, { useState } from "react";
 import "./CSS/LoginSignup.css";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../Context/AuthContext";
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 const LoginSignup = () => {
   const [state, setState] = useState("Login");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const navigate = useNavigate();
+  const { login: authLogin } = useAuth();
 
   const [formData, setFormData] = useState({
     username: "",
@@ -19,36 +26,41 @@ const LoginSignup = () => {
 
   const login = async () => {
     setLoading(true);
-    console.log("  Bắt đầu đăng nhập với:", formData.email);
     try {
-      // =============================================
-      // [GIẢ LẬP] Dùng khi chưa có backend - xóa khi BE xong
-      await new Promise((res) => setTimeout(res, 800));
-      const data = { success: true, token: "fake-token-123" };
-      // =============================================
+      let data;
 
-      // =============================================
-      /*
-      const response = await fetch("http://localhost:5000/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password,
-        }),
-      });
-      const data = await response.json();
-      // =============================================
-*/
-      if (data.success) {
-        localStorage.setItem("auth-token", data.token);
-        window.location.replace("/");
+      if (!API_URL) {
+        await new Promise((res) => setTimeout(res, 800));
+        data = {
+          success: true,
+          token: "fake-token",
+          user: {
+            username: "Demo User",
+            email: formData.email,
+            role: "user",
+          },
+        };
+      } else {
+        const response = await fetch(`${API_URL}/auth/login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: formData.email,
+            password: formData.password,
+          }),
+        });
+        data = await response.json();
+      }
+
+      if (data?.success) {
+        authLogin(data.token, data.user); // ✅ dùng context, tự lưu localStorage + update state
+        navigate("/");
       } else {
         setError(data.message || "Đăng nhập thất bại");
       }
     } catch (err) {
-      console.error("Login error:", err);
-      setError("Không thể kết nối server. Vui lòng thử lại.");
+      console.error(err);
+      setError("Không thể kết nối server");
     } finally {
       setLoading(false);
     }
@@ -57,34 +69,37 @@ const LoginSignup = () => {
   const signup = async () => {
     setLoading(true);
     try {
-      // =============================================
-      // [GIẢ LẬP] Dùng khi chưa có backend - xóa khi BE xong
-      // await new Promise((res) => setTimeout(res, 800));
-      // const data = { success: true, token: "fake-token-456" };
-      // =============================================
+      let data;
 
-      // =============================================
-      const response = await fetch("http://localhost:5000/api/auth/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          username: formData.username,
-          email: formData.email,
-          password: formData.password,
-        }),
-      });
-      const data = await response.json();
-      // =============================================
-
-      if (data.success) {
-        localStorage.setItem("auth-token", data.token);
-        window.location.replace("/");
+      if (!API_URL) {
+        await new Promise((res) => setTimeout(res, 800));
+        data = {
+          success: true,
+          token: "fake-token",
+          user: {
+            username: formData.username,
+            email: formData.email,
+            role: "user",
+          },
+        };
       } else {
-        setError(data.message || "Đăng ký thất bại");
+        const response = await fetch(`${API_URL}/auth/signup`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData),
+        });
+        data = await response.json();
+      }
+
+      if (data?.success) {
+        authLogin(data.token, data.user); // ✅ dùng context
+        navigate("/");
+      } else {
+        setError(data?.message || "Đăng ký thất bại");
       }
     } catch (err) {
-      console.error("Signup error:", err);
-      setError("Không thể kết nối server. Vui lòng thử lại.");
+      console.error(err);
+      setError("Không thể kết nối server");
     } finally {
       setLoading(false);
     }
@@ -93,16 +108,13 @@ const LoginSignup = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     setError("");
-    if (state === "Login") {
-      login();
-    } else {
-      signup();
-    }
+    state === "Login" ? login() : signup();
   };
 
   const switchMode = (newState) => {
     setState(newState);
     setError("");
+    setLoading(false);
     setFormData({ username: "", email: "", password: "" });
   };
 
@@ -143,11 +155,7 @@ const LoginSignup = () => {
             />
           </div>
 
-          {error && (
-            <p style={{ color: "red", fontSize: "14px", margin: "8px 0" }}>
-              {error}
-            </p>
-          )}
+          {error && <p style={{ color: "red" }}>{error}</p>}
 
           {state === "Sign Up" && (
             <div className="loginsignup-agree">
@@ -169,7 +177,7 @@ const LoginSignup = () => {
         ) : (
           <p className="loginsignup-login">
             Already have an account?{" "}
-            <span onClick={() => switchMode("Login")}>Login</span>
+            <span onClick={() => switchMode("Login")}>Login now</span>
           </p>
         )}
       </div>
