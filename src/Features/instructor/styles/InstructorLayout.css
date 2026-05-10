@@ -1,0 +1,25 @@
+/* src/Instructor/InstructorLayout.css */
+
+.instructor-layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f5f5f0;
+  font-family: "Segoe UI", system-ui, sans-serif;
+}
+
+.instructor-content {
+  flex: 1;
+  padding: 32px 36px;
+  overflow-y: auto;
+  min-width: 0;
+}
+
+@media (max-width: 768px) {
+  .instructor-layout {
+    flex-direction: column;
+  }
+
+  .instructor-content {
+    padding: 20px 16px;
+  }
+}

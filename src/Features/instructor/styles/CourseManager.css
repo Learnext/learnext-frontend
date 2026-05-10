@@ -1,0 +1,514 @@
+/* src/Components/Instructor/CourseManager.css */
+
+/* ─── Shared loading / empty ──────────────────────────────── */
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 0;
+  font-size: 14px;
+  color: #999;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 64px 20px;
+  text-align: center;
+  color: #999;
+  font-size: 14px;
+}
+
+/* ─── Root wrapper ────────────────────────────────────────── */
+.course-manager {
+  max-width: 1000px;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   LIST VIEW
+═══════════════════════════════════════════════════════════ */
+.course-list-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.course-list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.course-list-header h2 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+/* ─── Create button ───────────────────────────────────────── */
+.btn-create {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 18px;
+  background: #1a1a1a;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.btn-create:hover {
+  opacity: 0.85;
+}
+
+/* ─── Table ───────────────────────────────────────────────── */
+.course-table-wrapper {
+  background: #fff;
+  border: 1px solid #e8e8e4;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.course-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.course-table th {
+  font-size: 11px;
+  font-weight: 600;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  padding: 11px 16px;
+  text-align: left;
+  background: #fafaf8;
+  border-bottom: 1px solid #e8e8e4;
+}
+
+.course-table td {
+  padding: 13px 16px;
+  font-size: 14px;
+  color: #333;
+  border-bottom: 1px solid #f0f0ec;
+  vertical-align: middle;
+}
+
+.course-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.course-table tbody tr:hover td {
+  background: #fafaf8;
+}
+
+/* ─── Course title cell ───────────────────────────────────── */
+.course-title-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.course-thumb-small {
+  width: 44px;
+  height: 34px;
+  border-radius: 6px;
+  background: #f0efe9;
+  border: 1px solid #e8e8e4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 16px;
+  overflow: hidden;
+}
+
+.course-thumb-small img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.thumb-placeholder {
+  font-size: 18px;
+}
+
+/* ─── Status badge ────────────────────────────────────────── */
+.status-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.status-published {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.status-draft {
+  background: #f5f5f0;
+  color: #888;
+}
+
+/* ─── Action buttons ──────────────────────────────────────── */
+.action-btns {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.btn-action {
+  padding: 5px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid #e0e0da;
+  background: #fff;
+  color: #444;
+  transition: all 0.15s;
+}
+
+.btn-action:hover {
+  background: #f5f5f0;
+}
+
+.btn-action.btn-manage {
+  color: #1a1a1a;
+  border-color: #c0c0b8;
+}
+
+.btn-action.btn-edit {
+  color: #1a56db;
+  border-color: #bcd0f7;
+  background: #f0f5ff;
+}
+
+.btn-action.btn-edit:hover {
+  background: #e0ebff;
+}
+
+.btn-action.btn-delete {
+  color: #c0392b;
+  border-color: #f5c6c2;
+  background: #fff5f5;
+}
+
+.btn-action.btn-delete:hover {
+  background: #ffe8e6;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   FORM VIEW (Create / Edit)
+═══════════════════════════════════════════════════════════ */
+.course-form-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 760px;
+}
+
+.course-form-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.course-form-header h2 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+/* ─── Back button ─────────────────────────────────────────── */
+.btn-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 7px 13px;
+  background: none;
+  border: 1px solid #e0e0da;
+  border-radius: 7px;
+  font-size: 13px;
+  color: #555;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-back:hover {
+  background: #f5f5f0;
+  color: #1a1a1a;
+}
+
+/* ─── Alert messages ──────────────────────────────────────── */
+.form-error {
+  padding: 11px 14px;
+  background: #fff5f5;
+  border: 1px solid #f5c6c2;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #c0392b;
+}
+
+.form-success {
+  padding: 11px 14px;
+  background: #f0faf2;
+  border: 1px solid #b7e4c7;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #2e7d32;
+}
+
+/* ─── Form sections ───────────────────────────────────────── */
+.course-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-section {
+  background: #fff;
+  border: 1px solid #e8e8e4;
+  border-radius: 10px;
+  padding: 22px 24px;
+}
+
+.form-section h3 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 18px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f0f0ec;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.form-group:last-child {
+  margin-bottom: 0;
+}
+
+.form-group label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #444;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  padding: 9px 12px;
+  border: 1px solid #ddddd8;
+  border-radius: 7px;
+  font-size: 14px;
+  color: #1a1a1a;
+  background: #fff;
+  outline: none;
+  transition: border-color 0.15s;
+  font-family: inherit;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: #999;
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.required {
+  color: #c0392b;
+}
+
+/* ─── Upload boxes ────────────────────────────────────────── */
+.upload-box {
+  border: 1.5px dashed #d0d0c8;
+  border-radius: 8px;
+  cursor: pointer;
+  min-height: 130px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  transition:
+    border-color 0.15s,
+    background 0.15s;
+}
+
+.upload-box:hover {
+  border-color: #999;
+  background: #fafaf8;
+}
+
+.upload-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 20px;
+  text-align: center;
+}
+
+.upload-placeholder span {
+  font-size: 28px;
+}
+
+.upload-placeholder p {
+  font-size: 13px;
+  color: #666;
+}
+
+.upload-placeholder small {
+  font-size: 11px;
+  color: #aaa;
+}
+
+.thumbnail-preview {
+  width: 100%;
+  height: 130px;
+  object-fit: cover;
+}
+
+/* ─── Form actions ────────────────────────────────────────── */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.btn-cancel {
+  padding: 9px 20px;
+  background: none;
+  border: 1px solid #ddddd8;
+  border-radius: 7px;
+  font-size: 14px;
+  color: #555;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-cancel:hover:not(:disabled) {
+  background: #f5f5f0;
+}
+
+.btn-cancel:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-save {
+  padding: 9px 22px;
+  background: #1a1a1a;
+  color: #fff;
+  border: none;
+  border-radius: 7px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.btn-save:hover:not(:disabled) {
+  opacity: 0.85;
+}
+
+.btn-save:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   MODAL (Delete confirm)
+═══════════════════════════════════════════════════════════ */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.modal-confirm {
+  background: #fff;
+  border-radius: 12px;
+  padding: 26px 28px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+}
+
+.modal-confirm h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 10px;
+}
+
+.modal-confirm p {
+  font-size: 14px;
+  color: #666;
+  line-height: 1.5;
+  margin-bottom: 20px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.btn-delete-confirm {
+  padding: 9px 20px;
+  background: #c0392b;
+  color: #fff;
+  border: none;
+  border-radius: 7px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.btn-delete-confirm:hover {
+  opacity: 0.88;
+}
+
+@media (max-width: 640px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .course-table th:nth-child(2),
+  .course-table td:nth-child(2),
+  .course-table th:nth-child(4),
+  .course-table td:nth-child(4) {
+    display: none;
+  }
+}

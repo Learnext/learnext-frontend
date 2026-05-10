@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "./Support.css";
+import "../styles/Support.css";
 
 const CATEGORIES = [
   { value: "payment", label: "Thanh toán / Hoàn tiền" },
