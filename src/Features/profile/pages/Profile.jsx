@@ -16,9 +16,7 @@ const Profile = () => {
   const profile = useProfile(authUser, login);
 
   useEffect(() => {
-    if (!authUser) {
-      navigate("/login");
-    }
+    if (!authUser) navigate("/login");
   }, [authUser, navigate]);
 
   if (!authUser) return null;

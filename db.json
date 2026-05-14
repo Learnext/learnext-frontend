@@ -1,7 +1,7 @@
 {
   "users": [
     {
-      "id": 1,
+      "id": "1",
       "username": "Teacher",
       "email": "teacher@gmail.com",
       "password": "123",
@@ -9,12 +9,22 @@
       "isInstructor": true
     },
     {
-      "id": 2,
-      "username": "User",
-      "email": "user@gmail.com",
-      "password": "123",
+      "username": "Nguyen Van Aa",
+      "email": "tanngu@gmail.com",
+      "password": "1",
       "role": "user",
-      "isInstructor": false
+      "id": "i9JBjhPsb2U"
+    },
+    {
+      "username": "khanhnguyen",
+      "email": "khanhnguyen2709kn@gmail.com",
+      "password": "1",
+      "role": "user",
+      "id": "pp_wdJOC338",
+      "isInstructor": false,
+      "phone": "",
+      "bio": "",
+      "expertise": ""
     }
   ],
   "courses": [

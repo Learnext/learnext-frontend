@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { updateProfile } from "../services/profileService";
 
 export const useProfile = (authUser, authLogin) => {
@@ -8,17 +8,28 @@ export const useProfile = (authUser, authLogin) => {
   const [error, setError] = useState("");
 
   const [formData, setFormData] = useState({
-    username: authUser?.username || "",
-    phone: authUser?.phone || "",
-    bio: authUser?.bio || "",
-    expertise: authUser?.expertise || "",
+    username: "",
+    phone: "",
+    bio: "",
+    expertise: "",
   });
 
+  useEffect(() => {
+    if (authUser) {
+      setFormData({
+        username: authUser.username || "",
+        phone: authUser.phone || "",
+        bio: authUser.bio || "",
+        expertise: authUser.expertise || "",
+      });
+    }
+  }, [authUser]);
+
   const changeHandler = (e) => {
-    setFormData({
-      ...formData,
+    setFormData((prev) => ({
+      ...prev,
       [e.target.name]: e.target.value,
-    });
+    }));
 
     setError("");
   };
@@ -31,14 +42,14 @@ export const useProfile = (authUser, authLogin) => {
       const data = await updateProfile(formData, authUser);
 
       if (!data.success) {
-        setError(data.message);
+        setError(data.message || "Lưu thất bại");
         return;
       }
 
       authLogin(localStorage.getItem("auth-token"), data.user);
 
-      setEditing(false);
       setSaved(true);
+      setEditing(false);
 
       setTimeout(() => setSaved(false), 3000);
     } catch {
@@ -50,10 +61,10 @@ export const useProfile = (authUser, authLogin) => {
 
   const handleCancel = () => {
     setFormData({
-      username: authUser.username || "",
-      phone: authUser.phone || "",
-      bio: authUser.bio || "",
-      expertise: authUser.expertise || "",
+      username: authUser?.username || "",
+      phone: authUser?.phone || "",
+      bio: authUser?.bio || "",
+      expertise: authUser?.expertise || "",
     });
 
     setEditing(false);

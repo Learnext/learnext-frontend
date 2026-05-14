@@ -1,26 +1,30 @@
 const ProfileHeader = ({ authUser, editing, setEditing }) => {
-  const isInstructor = authUser.role === "instructor";
+  const isInstructor = authUser?.role === "instructor";
 
   return (
     <div className="profile-header">
       <div className="profile-avatar">
         <div className="avatar-circle">
-          {authUser.username?.charAt(0).toUpperCase() || "U"}
+          {authUser?.username?.charAt(0)?.toUpperCase() || "U"}
         </div>
       </div>
 
       <div className="profile-header-info">
-        <h2>{authUser.username}</h2>
+        <h2>{authUser?.username}</h2>
 
-        <span className={`role-badge role-${authUser.role}`}>
+        <span className={`role-badge role-${authUser?.role}`}>
           {isInstructor ? "Giảng viên" : "Học viên"}
         </span>
 
-        <p className="profile-email">{authUser.email}</p>
+        <p>{authUser?.email}</p>
       </div>
 
       {!editing && (
-        <button className="btn-edit" onClick={() => setEditing(true)}>
+        <button
+          className="btn-edit"
+          type="button"
+          onClick={() => setEditing(true)}
+        >
           Chỉnh sửa
         </button>
       )}

@@ -1,13 +1,19 @@
 const API_URL = import.meta.env.VITE_API_URL;
 
+const request = async (url, options = {}) => {
+  const response = await fetch(url, options);
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || "Request failed");
+  }
+
+  return data;
+};
+
 export const loginService = async (email, password) => {
-  console.log("LOGIN:", email, password);
-
-  const response = await fetch(`${API_URL}/users`);
-
-  const users = await response.json();
-
-  console.log("DB USERS:", users);
+  const users = await request(`${API_URL}/users`);
 
   const user = users.find(
     (u) =>
@@ -24,29 +30,43 @@ export const loginService = async (email, password) => {
 
   return {
     success: true,
-    token: "fake-token",
+    token: "fake-jwt-token",
     user,
   };
 };
 
 export const signupService = async (formData) => {
-  const response = await fetch(`${API_URL}/users`, {
+  const users = await request(`${API_URL}/users`);
+
+  const exists = users.find(
+    (u) => u.email.trim().toLowerCase() === formData.email.trim().toLowerCase(),
+  );
+
+  if (exists) {
+    return {
+      success: false,
+      message: "Email đã tồn tại",
+    };
+  }
+
+  const newUser = {
+    username: formData.username,
+    email: formData.email,
+    password: formData.password,
+    role: "user",
+  };
+
+  const createdUser = await request(`${API_URL}/users`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({
-      ...formData,
-      role: "user",
-      isInstructor: false,
-    }),
+    body: JSON.stringify(newUser),
   });
-
-  const user = await response.json();
 
   return {
     success: true,
-    token: "fake-token",
-    user,
+    token: "fake-jwt-token",
+    user: createdUser,
   };
 };

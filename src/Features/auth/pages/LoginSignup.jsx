@@ -28,6 +28,7 @@ const LoginSignup = () => {
     e.preventDefault();
 
     setLoading(true);
+    setError("");
 
     try {
       const data =
@@ -35,15 +36,20 @@ const LoginSignup = () => {
           ? await loginService(formData.email, formData.password)
           : await signupService(formData);
 
-      if (data.success) {
-        login(data.token, data.user);
-
-        navigate("/");
-      } else {
+      if (!data.success) {
         setError(data.message);
+        return;
       }
-    } catch {
-      setError("Không thể kết nối server");
+
+      login(data.token, data.user);
+
+      if (state === "Sign Up") {
+        alert("Đăng ký thành công!");
+      }
+
+      navigate("/");
+    } catch (err) {
+      setError(err.message || "Không thể kết nối server");
     } finally {
       setLoading(false);
     }
