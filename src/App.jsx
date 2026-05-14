@@ -19,7 +19,7 @@ import Support from "./Features/support/pages/Support.jsx";
 
 import CourseManager from "./Features/instructor/pages/CourseManager.jsx";
 import InstructorDashboard from "./Features/instructor/pages/InstructorDashboard.jsx";
-import InstructorLayout from "./Features/instructor/pages/InstructorLayout.jsx";
+import InstructorLayout from "./Features/instructor/components/InstructorLayout.jsx";
 
 function AppContent() {
   const location = useLocation();

@@ -1,0 +1,130 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "username": "Teacher",
+      "email": "teacher@gmail.com",
+      "password": "123",
+      "role": "instructor",
+      "isInstructor": true
+    },
+    {
+      "id": 2,
+      "username": "User",
+      "email": "user@gmail.com",
+      "password": "123",
+      "role": "user",
+      "isInstructor": false
+    }
+  ],
+  "courses": [
+    {
+      "title": "React cơ bản",
+      "description": "Khóa học React",
+      "price": 2990001,
+      "category": "Lập trình",
+      "tags": "react,javascript",
+      "thumbnail": null,
+      "intro_video": null,
+      "id": "1"
+    },
+    {
+      "title": "react",
+      "description": "",
+      "price": 2444444,
+      "category": "Lập trình",
+      "tags": "nodejs,backend",
+      "thumbnail": "blob:http://localhost:5173/c07f950d-5579-4f72-8a48-2a89eab7f559",
+      "intro_video": "John_The_Ripper_Password_Crack.mp4",
+      "status": "draft",
+      "students": 0,
+      "created_at": "2026-05-14",
+      "id": "pPa67RXg1Uo"
+    },
+    {
+      "title": "1",
+      "description": "1",
+      "price": 1,
+      "category": "Lập trình",
+      "tags": "1",
+      "thumbnail": "blob:http://localhost:5173/b96d6af7-0d22-470a-bbe6-81044a82bbe9",
+      "intro_video": null,
+      "status": "draft",
+      "students": 0,
+      "created_at": "2026-05-14",
+      "id": "FIf76uxgTLs"
+    },
+    {
+      "title": "1",
+      "description": "1",
+      "price": 1,
+      "category": "Thiết kế",
+      "tags": "1",
+      "thumbnail": "blob:http://localhost:5173/56d085e5-4789-42c9-afcc-3491f39e54f2",
+      "intro_video": null,
+      "status": "draft",
+      "students": 0,
+      "created_at": "2026-05-14",
+      "id": "4_oVnZsQOUg"
+    },
+    {
+      "title": "1",
+      "description": "1",
+      "price": 1,
+      "category": "Thiết kế",
+      "tags": "1",
+      "thumbnail": null,
+      "intro_video": null,
+      "status": "draft",
+      "students": 0,
+      "created_at": "2026-05-14",
+      "id": "zFzi2X1_k6A"
+    },
+    {
+      "title": "tanngu",
+      "description": "1",
+      "price": 123,
+      "category": "Lập trình",
+      "tags": "",
+      "thumbnail": null,
+      "intro_video": null,
+      "status": "draft",
+      "students": 0,
+      "created_at": "2026-05-14",
+      "id": "hbOUYI-8zHc"
+    }
+  ],
+  "content": [
+    {
+      "id": "1",
+      "title": "Chương 1",
+      "order": 1,
+      "sections": []
+    }
+  ],
+  "chapters": [
+    {
+      "id": "1",
+      "title": "Chương 1",
+      "order": 1,
+      "sections": []
+    }
+  ],
+  "sections": [
+    {
+      "id": "1",
+      "title": "Phần 1",
+      "order": 1,
+      "lessons": []
+    }
+  ],
+  "lessons": [
+    {
+      "id": "1",
+      "title": "Bài 1",
+      "type": "video",
+      "file": "intro.mp4"
+    }
+  ],
+  "$schema": "./node_modules/json-server/schema.json"
+}

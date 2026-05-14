@@ -38,7 +38,7 @@ const LoginSignup = () => {
       if (data.success) {
         login(data.token, data.user);
 
-        navigate(data.user.isInstructor ? "/instructor" : "/");
+        navigate("/");
       } else {
         setError(data.message);
       }

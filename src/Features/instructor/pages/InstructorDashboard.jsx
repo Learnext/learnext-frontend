@@ -1,76 +1,33 @@
-// src/Instructor/InstructorDashboard.jsx
+// src/Features/instructor/pages/InstructorDashboard.jsx
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../auth/Context/AuthContext";
+import { useInstructorGuard } from "../hooks/useInstructorGuard";
+import { fetchStatsService } from "../services/instructorService";
 import "../styles/InstructorDashboard.css";
 
-const API_URL = import.meta.env.VITE_API_URL;
-
-// ─── Auth header helper (DRY) ─────────────────────────────────
-const authHeaders = () => ({
-  Authorization: `Bearer ${localStorage.getItem("auth-token")}`,
-});
-
-// ─── FIX #5: Fake stats thay vì hardcode UI ──────────────────
-const FAKE_STATS = {
-  totalCourses: 12,
-  totalStudents: 320,
-  totalRevenue: 15000000,
-  recentCourses: [
-    {
-      id: 1,
-      title: "React từ cơ bản đến nâng cao",
-      students: 120,
-      status: "published",
-    },
-    { id: 2, title: "Node.js & Express", students: 45, status: "published" },
-    { id: 3, title: "UI/UX với Figma", students: 0, status: "draft" },
-  ],
-};
-
 const InstructorDashboard = () => {
-  const { user: authUser } = useAuth();
   const navigate = useNavigate();
+  const { isAllowed } = useInstructorGuard();
 
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // ─── Guard redirect ───────────────────────────────────────
   useEffect(() => {
-    if (!authUser || authUser.role !== "instructor") {
-      navigate("/");
-    }
-  }, [authUser, navigate]);
-
-  // ─── Fetch stats từ API ───────────────────────────────────
-  useEffect(() => {
-    const fetchStats = async () => {
+    const load = async () => {
       setLoading(true);
       try {
-        if (!API_URL) {
-          await new Promise((r) => setTimeout(r, 600));
-          setStats(FAKE_STATS);
-        } else {
-          const res = await fetch(`${API_URL}/instructor/stats`, {
-            headers: authHeaders(),
-          });
-          // ─── Check HTTP status ────────────────────────────
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
-          const data = await res.json();
-          if (data.success) setStats(data.stats);
-        }
+        const data = await fetchStatsService();
+        if (data.success) setStats(data.stats);
       } catch (err) {
         console.error("Lỗi tải thống kê:", err);
-        // Fallback về fake data nếu lỗi
-        setStats(FAKE_STATS);
       } finally {
         setLoading(false);
       }
     };
-    fetchStats();
+    load();
   }, []);
 
-  if (!authUser || authUser.role !== "instructor") return null;
+  if (!isAllowed) return null;
 
   return (
     <div className="instructor-dashboard">
@@ -85,19 +42,16 @@ const InstructorDashboard = () => {
               <h3>Tổng khóa học</h3>
               <p>{stats?.totalCourses ?? 0}</p>
             </div>
-
             <div className="dashboard-card">
               <h3>Tổng học viên</h3>
               <p>{stats?.totalStudents ?? 0}</p>
             </div>
-
             <div className="dashboard-card">
               <h3>Doanh thu</h3>
               <p>{(stats?.totalRevenue ?? 0).toLocaleString("vi-VN")}đ</p>
             </div>
           </div>
 
-          {/* Khóa học gần đây */}
           {stats?.recentCourses?.length > 0 && (
             <div className="recent-courses">
               <div className="recent-header">
