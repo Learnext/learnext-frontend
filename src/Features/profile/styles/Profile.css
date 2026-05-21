@@ -1,0 +1,268 @@
+.profile-page {
+  min-height: 100vh;
+  background: #fce3fe;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 120px 20px 60px;
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
+
+.profile-container {
+  width: 100%;
+  max-width: 680px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+/* HEADER */
+
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 32px 50px;
+  background: linear-gradient(180deg, #fde1ff 0%, #e1ffea22 60%);
+}
+
+.profile-avatar {
+  flex-shrink: 0;
+}
+
+.avatar-circle {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: #ff4141;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.profile-header-info h2 {
+  font-size: 22px;
+  font-weight: 600;
+  margin: 0 0 6px;
+}
+
+.role-badge {
+  display: inline-block;
+  padding: 3px 14px;
+  border-radius: 75px;
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.role-user {
+  background: #f3f3f3;
+  color: #515151;
+  border: 1px solid #e3e3e3;
+}
+
+.role-instructor {
+  background: #ff4141;
+  color: white;
+}
+
+.profile-email {
+  font-size: 14px;
+  color: #626262;
+  margin: 0;
+}
+
+.btn-edit {
+  margin-left: auto;
+  width: 130px;
+  height: 46px;
+  border: 1px solid #7a7a7a;
+  border-radius: 75px;
+  background: white;
+  cursor: pointer;
+}
+
+.btn-edit:hover {
+  background: #f5f5f5;
+}
+
+/* ALERT */
+
+.save-success,
+.save-error {
+  margin: 16px 50px 0;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.save-success {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.save-error {
+  background: #ffebee;
+  color: #c62828;
+}
+
+/* FORM */
+
+.profile-form {
+  padding: 24px 50px;
+}
+
+.form-section {
+  padding: 20px 0;
+  border-bottom: 1px solid #e3e3e3;
+}
+
+.form-section:last-child {
+  border-bottom: none;
+}
+
+.form-section h3 {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 18px;
+  text-transform: uppercase;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #616161;
+}
+
+.form-group input,
+.form-group textarea {
+  border: 1px solid #e3e3e3;
+  border-radius: 8px;
+  font-size: 16px;
+  padding: 14px 16px;
+  outline: none;
+  resize: none;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  border-color: #ff4141;
+}
+
+.form-group input:disabled,
+.form-group textarea:disabled {
+  background: #fafafa;
+}
+
+/* INSTRUCTOR */
+
+.instructor-section {
+  background: linear-gradient(180deg, #fde1ff 0%, #e1ffea22 60%);
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.instructor-stats {
+  display: flex;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.stat-card {
+  flex: 1;
+  text-align: center;
+  padding: 16px;
+  background: white;
+  border-radius: 10px;
+  border: 1px solid #e3e3e3;
+}
+
+.stat-number {
+  display: block;
+  font-size: 26px;
+  font-weight: 700;
+  color: #ff4141;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: #616161;
+}
+
+/* ACTIONS */
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 14px;
+  padding-top: 20px;
+}
+
+.btn-cancel,
+.btn-save {
+  height: 52px;
+  border-radius: 75px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.btn-cancel {
+  width: 120px;
+  border: 1px solid #7a7a7a;
+  background: white;
+}
+
+.btn-save {
+  width: 180px;
+  border: none;
+  background: #ff4141;
+  color: white;
+}
+
+.btn-save:hover {
+  background: #e63a3a;
+}
+
+/* MOBILE */
+
+@media (max-width: 600px) {
+  .profile-header {
+    padding: 24px 20px;
+    flex-wrap: wrap;
+  }
+
+  .btn-edit {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .profile-form {
+    padding: 16px 20px;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .instructor-stats {
+    flex-direction: column;
+  }
+}

@@ -1,0 +1,15 @@
+.hero {
+  width: 90%;
+  margin: 100px auto 0; /* cách navbar */
+  border-radius: 20px;
+  overflow: hidden; /* bo góc không bị lòi ảnh */
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* ẢNH */
+.hero img {
+  width: 100%;
+  height: 400px; /* 🔥 chiều cao banner */
+  object-fit: cover; /* fill đẹp như Unica */
+  display: block;
+}
