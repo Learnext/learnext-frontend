@@ -1,0 +1,28 @@
+export const FAKE_COURSES = [
+  {
+    id: 1,
+    title: "React từ cơ bản đến nâng cao",
+    description: "Học React hoàn chỉnh",
+    price: 299000,
+    category: "Lập trình",
+    tags: "react,frontend",
+    thumbnail: null,
+    intro_video: null,
+    status: "published",
+    students: 120,
+    created_at: "2024-01-01",
+  },
+  {
+    id: 2,
+    title: "Node.js & Express",
+    description: "Backend với Node.js",
+    price: 199000,
+    category: "Lập trình",
+    tags: "nodejs,backend",
+    thumbnail: null,
+    intro_video: null,
+    status: "draft",
+    students: 0,
+    created_at: "2024-02-01",
+  },
+];
