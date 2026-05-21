@@ -91,17 +91,17 @@
       "id": "zFzi2X1_k6A"
     },
     {
-      "title": "tanngu",
-      "description": "1",
-      "price": 123,
+      "title": "NguyenNgu",
+      "description": "",
+      "price": 299999,
       "category": "Lập trình",
-      "tags": "",
-      "thumbnail": null,
-      "intro_video": null,
+      "tags": "an cut",
+      "thumbnail": "blob:http://localhost:8081/f993680c-6647-4cf4-9b5e-1507cf2b3d2b",
+      "intro_video": "YTDown.com_YouTube_GOJO-VS-SUKUNA-FULL-FIGHT-AMV-TRA-CHO-AN_Media_-bSLs4m1d_4_001_1080p.mp4",
       "status": "draft",
       "students": 0,
-      "created_at": "2026-05-14",
-      "id": "hbOUYI-8zHc"
+      "created_at": "2026-05-21",
+      "id": "esavLgFRZCQ"
     }
   ],
   "content": [

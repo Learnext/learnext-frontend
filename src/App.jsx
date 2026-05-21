@@ -15,7 +15,7 @@ import LoginSignup from "./Features/auth/pages/LoginSignup.jsx";
 import Footers from "./Components/Footers/Footers.jsx";
 
 import Profile from "./Features/profile/pages/Profile.jsx";
-import Support from "./Features/support/pages/Support.jsx";
+import Support from "./Features/Support/pages/Support.jsx";
 
 import CourseManager from "./Features/instructor/pages/CourseManager.jsx";
 import InstructorDashboard from "./Features/instructor/pages/InstructorDashboard.jsx";

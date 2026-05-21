@@ -1,9 +1,9 @@
 import React from "react";
 import "./Footers.css";
-import footer_logo from "../../assets/Frontend_Assets/logo.png";
-import instagram_icon from "../../assets/Frontend_Assets/instagram_icon.png";
-import pintester_icon from "../../assets/Frontend_Assets/pintester_icon.png";
-import whatsapp_icon from "../../assets/Frontend_Assets/whatsapp_icon.png";
+import footer_logo from "../../Assets/Frontend_Assets/logo.png";
+import instagram_icon from "../../Assets/Frontend_Assets/instagram_icon.png";
+import pintester_icon from "../../Assets/Frontend_Assets/pintester_icon.png";
+import whatsapp_icon from "../../Assets/Frontend_Assets/whatsapp_icon.png";
 
 const Footers = () => {
   return (
