@@ -16,6 +16,10 @@ import Footers from "./Components/Footers/Footers.jsx";
 
 import Profile from "./Features/profile/pages/Profile.jsx";
 import Support from "./Features/Support/pages/Support.jsx";
+import Activate from "./Features/account/pages/Activate.jsx";
+import AdminConsole from "./Features/account/pages/AdminConsole.jsx";
+import Learning from "./Features/account/pages/Learning.jsx";
+import Orders from "./Features/account/pages/Orders.jsx";
 
 import CourseManager from "./Features/instructor/pages/CourseManager.jsx";
 import InstructorDashboard from "./Features/instructor/pages/InstructorDashboard.jsx";
@@ -40,6 +44,10 @@ function AppContent() {
         <Route path="/login" element={<LoginSignup />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/support" element={<Support />} />
+        <Route path="/orders" element={<Orders />} />
+        <Route path="/activate" element={<Activate />} />
+        <Route path="/learning" element={<Learning />} />
+        <Route path="/admin" element={<AdminConsole />} />
 
         {/* Instructor */}
         <Route path="/instructor" element={<InstructorLayout />}>
