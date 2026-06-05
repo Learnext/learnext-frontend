@@ -85,6 +85,15 @@ const Navbar = () => {
                 <Link to="/profile" onClick={() => setDropdownOpen(false)}>
                   <div className="nav-dropdown-item">Trang cá nhân</div>
                 </Link>
+                <Link to="/orders" onClick={() => setDropdownOpen(false)}>
+                  <div className="nav-dropdown-item">My orders</div>
+                </Link>
+                <Link to="/activate" onClick={() => setDropdownOpen(false)}>
+                  <div className="nav-dropdown-item">Activate</div>
+                </Link>
+                <Link to="/learning" onClick={() => setDropdownOpen(false)}>
+                  <div className="nav-dropdown-item">Learning</div>
+                </Link>
 
                 {/* Instructor dashboard */}
                 {user?.isInstructor && (
