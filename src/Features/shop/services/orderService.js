@@ -44,3 +44,34 @@ export const createOrder = async (courseId) => {
 
   return unwrap(payload);
 };
+
+export const submitPaymentProof = async (orderId, paymentProofUrl) => {
+  if (!API_BASE) {
+    return {
+      id: orderId,
+      paymentProofUrl,
+      status: "PROOF_SUBMITTED",
+    };
+  }
+
+  const token = localStorage.getItem("auth-token");
+  if (!token) {
+    throw new Error("LOGIN_REQUIRED");
+  }
+
+  const response = await fetch(`${API_BASE}/orders/${orderId}/proof`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ paymentProofUrl }),
+  });
+  const payload = await response.json();
+
+  if (!response.ok) {
+    throw new Error(payload?.error?.message || payload?.message || "PROOF_FAILED");
+  }
+
+  return unwrap(payload);
+};
