@@ -5,6 +5,7 @@ import {
   createCourseService,
   updateCourseService,
   deleteCourseService,
+  publishCourseService,
 } from "../services/instructorService";
 
 const EMPTY_FORM = {
@@ -187,6 +188,18 @@ export const useCourseManager = () => {
     }
   };
 
+  const handlePublish = async (id) => {
+    try {
+      const data = await publishCourseService(id);
+      if (!data.success) return;
+      setCourses((prev) =>
+        prev.map((c) => (c.id === id ? { ...c, ...data.course } : c)),
+      );
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   return {
     courses,
     loadingList,
@@ -207,5 +220,6 @@ export const useCourseManager = () => {
     handleCreate,
     handleEdit,
     handleDelete,
+    handlePublish,
   };
 };
