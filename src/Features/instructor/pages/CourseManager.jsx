@@ -28,6 +28,7 @@ const CourseManager = () => {
     handleCreate,
     handleEdit,
     handleDelete,
+    handlePublish,
   } = useCourseManager();
 
   if (!isAllowed) return null;
@@ -58,6 +59,7 @@ const CourseManager = () => {
               courses={courses}
               onEdit={openEdit}
               onDelete={setDeleteConfirm}
+              onPublish={handlePublish}
             />
           )}
         </div>
