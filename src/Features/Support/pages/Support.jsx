@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { createSupportLead } from "../services/supportService";
 import "../styles/Support.css";
 
 const CATEGORIES = [
@@ -19,6 +20,7 @@ const Support = () => {
   });
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [submitError, setSubmitError] = useState("");
   const [tickets, setTickets] = useState([
     // Mock ticket history
     {
@@ -37,28 +39,32 @@ const Support = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setSubmitError("");
 
-    // Simulate API call
-    await new Promise((res) => setTimeout(res, 1000));
+    try {
+      const lead = await createSupportLead(formData);
+      const newTicket = {
+        id: lead.id ? String(lead.id).slice(0, 8).toUpperCase() : `TK-00${tickets.length + 2}`,
+        subject: lead.subject || formData.subject,
+        category: lead.category || formData.category,
+        status: "pending",
+        date: new Date(lead.createdAt || Date.now()).toLocaleDateString("vi-VN"),
+      };
 
-    const newTicket = {
-      id: `TK-00${tickets.length + 2}`,
-      subject: formData.subject,
-      category: formData.category,
-      status: "pending",
-      date: new Date().toLocaleDateString("vi-VN"),
-    };
-
-    setTickets([newTicket, ...tickets]);
-    setSubmitted(true);
-    setLoading(false);
-    setFormData({
-      name: "",
-      email: "",
-      category: "",
-      subject: "",
-      message: "",
-    });
+      setTickets([newTicket, ...tickets]);
+      setSubmitted(true);
+      setFormData({
+        name: "",
+        email: "",
+        category: "",
+        subject: "",
+        message: "",
+      });
+    } catch (error) {
+      setSubmitError(error.message || "Không thể gửi yêu cầu hỗ trợ");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleNewTicket = () => {
@@ -169,6 +175,7 @@ const Support = () => {
               <button type="submit" className="btn-submit" disabled={loading}>
                 {loading ? "Đang gửi..." : "Gửi yêu cầu hỗ trợ"}
               </button>
+              {submitError && <p className="support-error">{submitError}</p>}
             </form>
           )}
         </div>
