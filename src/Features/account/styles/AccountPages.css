@@ -1,0 +1,119 @@
+.account-page {
+  max-width: 1100px;
+  margin: 52px auto;
+  padding: 0 24px;
+  color: #171717;
+}
+
+.account-panel {
+  border: 1px solid #e5e5e5;
+  padding: 28px;
+  background: #fff;
+}
+
+.account-narrow {
+  max-width: 560px;
+  margin: 0 auto;
+}
+
+.account-panel h1,
+.account-panel h2 {
+  margin: 0 0 18px;
+}
+
+.account-panel h1 {
+  font-size: 32px;
+}
+
+.account-panel h2 {
+  font-size: 22px;
+  margin-top: 28px;
+}
+
+.account-status {
+  margin: 0 0 16px;
+  color: #626262;
+}
+
+.account-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.account-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  border: 1px solid #e5e5e5;
+  padding: 16px;
+}
+
+.account-row strong,
+.account-row span {
+  display: block;
+}
+
+.account-row span {
+  margin-top: 4px;
+  color: #ff4141;
+  font-weight: 700;
+}
+
+.account-row p {
+  margin: 6px 0 0;
+  color: #626262;
+}
+
+.account-form,
+.account-inline-form,
+.account-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.account-form {
+  flex-direction: column;
+}
+
+.account-inline-form input,
+.account-form input {
+  min-width: 220px;
+  border: 1px solid #e5e5e5;
+  padding: 11px 12px;
+  font: inherit;
+}
+
+.account-inline-form button,
+.account-form button,
+.account-row button {
+  border: none;
+  background: #171717;
+  color: #fff;
+  padding: 11px 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.account-actions button:last-child {
+  background: #ff4141;
+}
+
+.account-subpanel {
+  margin-top: 22px;
+  border-top: 1px solid #e5e5e5;
+  padding-top: 20px;
+}
+
+@media (max-width: 760px) {
+  .account-row,
+  .account-inline-form,
+  .account-actions {
+    flex-direction: column;
+  }
+
+  .account-inline-form input {
+    min-width: 0;
+    width: 100%;
+  }
+}
