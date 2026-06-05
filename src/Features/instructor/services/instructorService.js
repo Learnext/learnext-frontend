@@ -2,15 +2,30 @@ import { FAKE_COURSES } from "../mock/courses.mock";
 import { FAKE_STATS } from "../mock/stats.mock";
 import { FAKE_CONTENT } from "../mock/content.mock";
 
-const API_URL = import.meta.env.VITE_API_URL;
+const rawApiUrl = import.meta.env.VITE_API_URL;
+const API_URL = rawApiUrl
+  ? rawApiUrl.endsWith("/api/v1")
+    ? rawApiUrl
+    : `${rawApiUrl}/api/v1`
+  : "";
 
 const delay = (ms = 500) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export const authHeaders = (isJson = false) => {
   const token = localStorage.getItem("auth-token");
+  let user = {};
+
+  try {
+    user = JSON.parse(localStorage.getItem("user") || "{}");
+  } catch {
+    user = {};
+  }
+
+  const instructorId = user.instructorId || user.id;
 
   return {
     ...(token && { Authorization: `Bearer ${token}` }),
+    ...(instructorId && { "X-Instructor-Id": instructorId }),
     ...(isJson && { "Content-Type": "application/json" }),
   };
 };
@@ -56,6 +71,58 @@ const fetchApi = async (url, options = {}) => {
   return data;
 };
 
+const unwrap = (payload) => {
+  if (payload && typeof payload === "object" && "success" in payload) {
+    return payload.data;
+  }
+
+  return payload;
+};
+
+const toUiCourse = (course) => ({
+  id: course.id,
+  title: course.title,
+  description: course.description || "",
+  price: Number(course.price || 0),
+  category: course.categoryName || course.category || "",
+  tags: course.tags || "",
+  thumbnail: course.thumbnailUrl || course.thumbnail || null,
+  intro_video: course.previewVideoUrl || course.intro_video || null,
+  status: String(course.status || "DRAFT").toLowerCase(),
+  students: course.students || 0,
+  created_at: course.createdAt || course.created_at,
+});
+
+const uploadFile = async (file) => {
+  if (!file || !API_URL) {
+    return null;
+  }
+
+  const signed = unwrap(await fetchApi(`${API_URL}/uploads/signed-url`, {
+    method: "POST",
+    headers: authHeaders(true),
+    body: JSON.stringify({
+      fileName: file.name,
+      contentType: file.type,
+      size: file.size,
+    }),
+  }));
+
+  const uploadResponse = await fetch(signed.uploadUrl, {
+    method: "PUT",
+    headers: {
+      "Content-Type": file.type,
+    },
+    body: file,
+  });
+
+  if (!uploadResponse.ok) {
+    throw new Error("UPLOAD_FAILED");
+  }
+
+  return signed.publicUrl;
+};
+
 //
 // DASHBOARD
 //
@@ -70,9 +137,9 @@ export const fetchStatsService = async () => {
     };
   }
 
-  const courses = await fetchApi(`${API_URL}/courses`, {
+  const courses = unwrap(await fetchApi(`${API_URL}/instructor/courses`, {
     headers: authHeaders(),
-  });
+  })).map(toUiCourse);
 
   return {
     success: true,
@@ -93,9 +160,18 @@ export const fetchStatsService = async () => {
 //
 
 export const fetchCoursesService = async () => {
-  const courses = await fetchApi(`${API_URL}/courses`, {
+  if (!API_URL) {
+    await delay();
+
+    return {
+      success: true,
+      courses: FAKE_COURSES,
+    };
+  }
+
+  const courses = unwrap(await fetchApi(`${API_URL}/instructor/courses`, {
     headers: authHeaders(),
-  });
+  })).map(toUiCourse);
 
   return {
     success: true,
@@ -104,61 +180,133 @@ export const fetchCoursesService = async () => {
 };
 
 export const createCourseService = async (formData) => {
+  if (!API_URL) {
+    await delay();
+
+    return {
+      success: true,
+      course: {
+        id: Date.now(),
+        title: formData.title,
+        description: formData.description,
+        price: Number(formData.price),
+        category: formData.category,
+        tags: formData.tags,
+        thumbnail: formData.thumbnailPreview || null,
+        intro_video: formData.introVideoName || null,
+        status: "draft",
+        students: 0,
+        created_at: new Date().toISOString(),
+      },
+    };
+  }
+
+  const thumbnailUrl = await uploadFile(formData.thumbnail);
+  const previewVideoUrl = await uploadFile(formData.intro_video);
+
   const payload = {
     title: formData.title,
     description: formData.description,
     price: Number(formData.price),
     category: formData.category,
-    tags: formData.tags,
-    thumbnail: formData.thumbnailPreview || null,
-    intro_video: formData.introVideoName || null,
-    status: "draft",
-    students: 0,
-    created_at: new Date().toISOString().split("T")[0],
+    thumbnailUrl: thumbnailUrl || formData.thumbnailPreview || null,
+    previewVideoUrl: previewVideoUrl || formData.introVideoName || null,
   };
 
-  const course = await fetchApi(`${API_URL}/courses`, {
+  const course = unwrap(await fetchApi(`${API_URL}/instructor/courses`, {
     method: "POST",
     headers: authHeaders(true),
     body: JSON.stringify(payload),
-  });
+  }));
 
   return {
     success: true,
-    course,
+    course: toUiCourse(course),
   };
 };
 
 export const updateCourseService = async (courseId, formData) => {
+  if (!API_URL) {
+    await delay();
+
+    return {
+      success: true,
+      course: {
+        id: courseId,
+        title: formData.title,
+        description: formData.description,
+        price: Number(formData.price),
+        category: formData.category,
+        tags: formData.tags,
+        thumbnail: formData.thumbnailPreview || null,
+        intro_video: formData.introVideoName || null,
+        status: "draft",
+        students: 0,
+        created_at: new Date().toISOString(),
+      },
+    };
+  }
+
+  const thumbnailUrl = await uploadFile(formData.thumbnail);
+  const previewVideoUrl = await uploadFile(formData.intro_video);
+
   const payload = {
     title: formData.title,
     description: formData.description,
     price: Number(formData.price),
     category: formData.category,
-    tags: formData.tags,
-    thumbnail: formData.thumbnailPreview || null,
-    intro_video: formData.introVideoName || null,
+    thumbnailUrl: thumbnailUrl || formData.thumbnailPreview || null,
+    previewVideoUrl: previewVideoUrl || formData.introVideoName || null,
   };
 
-  const course = await fetchApi(`${API_URL}/courses/${courseId}`, {
+  const course = unwrap(await fetchApi(`${API_URL}/instructor/courses/${courseId}`, {
     method: "PUT",
     headers: authHeaders(true),
     body: JSON.stringify(payload),
-  });
+  }));
 
   return {
     success: true,
-    course,
+    course: toUiCourse(course),
   };
 };
 
 export const deleteCourseService = async (courseId) => {
-  await fetchApi(`${API_URL}/courses/${courseId}`, {
+  if (!API_URL) {
+    await delay();
+    return { success: true };
+  }
+
+  await fetchApi(`${API_URL}/instructor/courses/${courseId}`, {
     method: "DELETE",
     headers: authHeaders(),
   });
 
   return { success: true };
+};
+
+export const publishCourseService = async (courseId) => {
+  if (!API_URL) {
+    await delay();
+
+    return {
+      success: true,
+      course: {
+        id: courseId,
+        status: "published",
+      },
+    };
+  }
+
+  const course = unwrap(await fetchApi(`${API_URL}/instructor/courses/${courseId}/publish`, {
+    method: "PATCH",
+    headers: authHeaders(),
+  }));
+
+  return {
+    success: true,
+    course: toUiCourse(course),
+  };
 };
 
 //

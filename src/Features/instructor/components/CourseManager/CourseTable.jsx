@@ -2,7 +2,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
-const CourseTable = ({ courses, onEdit, onDelete }) => {
+const CourseTable = ({ courses, onEdit, onDelete, onPublish }) => {
   const navigate = useNavigate();
 
   return (
@@ -57,6 +57,14 @@ const CourseTable = ({ courses, onEdit, onDelete }) => {
                   >
                     Sửa
                   </button>
+                  {course.status !== "published" && (
+                    <button
+                      className="btn-action btn-publish"
+                      onClick={() => onPublish(course.id)}
+                    >
+                      Publish
+                    </button>
+                  )}
                   <button
                     className="btn-action btn-delete"
                     onClick={() => onDelete(course.id)}
