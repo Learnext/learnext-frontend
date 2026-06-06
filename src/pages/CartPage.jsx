@@ -3,10 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { clearCart, getCartItems, removeCartItem } from "../utils/cart";
 import { notifyError, notifySuccess } from "../utils/notify";
 import apiFetch from "../utils/apiFetch";
+import "./CSS/CartPage.css";
 
 const rawApiUrl = import.meta.env.VITE_API_URL;
 const API = rawApiUrl
-  ? rawApiUrl.endsWith("/api/v1") ? rawApiUrl : `${rawApiUrl}/api/v1`
+  ? rawApiUrl.endsWith("/api/v1")
+    ? rawApiUrl
+    : `${rawApiUrl}/api/v1`
   : "http://localhost:1201/api/v1";
 
 const CartPage = () => {
@@ -16,7 +19,6 @@ const CartPage = () => {
   const [loading, setLoading] = useState(false);
 
   const total = items.reduce((sum, item) => sum + Number(item.price || 0), 0);
-
   const remove = (courseId) => setItems(removeCartItem(courseId));
 
   const confirmPaid = async () => {
@@ -30,7 +32,9 @@ const CartPage = () => {
       });
       const json = await res.json();
       if (!res.ok || !json.success) {
-        throw new Error(json.error?.message || json.message || "Xac nhan thanh toan that bai");
+        throw new Error(
+          json.error?.message || json.message || "Xac nhan thanh toan that bai",
+        );
       }
       notifySuccess("Da gia lap thanh toan. He thong se gui mail kich hoat.");
       navigate("/invoices");
@@ -49,11 +53,12 @@ const CartPage = () => {
       return;
     }
     if (!items.length) return;
-
     setLoading(true);
     try {
-      const uniqueItems = items.map((item) => ({ courseId: item.id, quantity: 1 }));
-
+      const uniqueItems = items.map((item) => ({
+        courseId: item.id,
+        quantity: 1,
+      }));
       const res = await apiFetch(`${API}/orders/cart`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -61,7 +66,9 @@ const CartPage = () => {
       });
       const json = await res.json();
       if (!res.ok || !json.success) {
-        throw new Error(json.error?.message || json.message || "Tao don hang that bai");
+        throw new Error(
+          json.error?.message || json.message || "Tao don hang that bai",
+        );
       }
       setCheckout(json.data);
       clearCart();
@@ -74,109 +81,113 @@ const CartPage = () => {
   };
 
   return (
-    <div style={{ maxWidth: 980, margin: "40px auto", padding: 24 }}>
-      <h1>Gio hang</h1>
+    <div className="cart-page">
+      <h1 className="cart-title">Giỏ hàng</h1>
 
       {!items.length && !checkout && (
-        <div style={{ textAlign: "center", padding: "60px 0", color: "#888" }}>
-          <p style={{ fontSize: 18 }}>Gio hang dang trong.</p>
-          <button onClick={() => navigate("/")} style={{ marginTop: 16, padding: "10px 24px", cursor: "pointer" }}>
-            Kham pha khoa hoc
-          </button>
+        <div className="cart-empty">
+          <div className="cart-empty-icon">🛒</div>
+          <p>Giỏ hàng đang trống.</p>
+          <button onClick={() => navigate("/")}>Khám phá khóa học</button>
         </div>
       )}
 
-      {items.map((item) => (
-        <div
-          key={item.id}
-          style={{ display: "flex", gap: 16, borderBottom: "1px solid #eee", padding: "16px 0", alignItems: "center" }}
-        >
-          <img
-            src={item.thumbnailUrl || "https://placehold.co/120x80/4f46e5/white?text=Course"}
-            alt={item.title}
-            style={{ width: 120, height: 80, objectFit: "cover", borderRadius: 8, flexShrink: 0 }}
-          />
-          <div style={{ flex: 1 }}>
-            <b style={{ fontSize: 15 }}>{item.title}</b>
-            <div style={{ color: "#e74c3c", fontWeight: 600, marginTop: 4 }}>
-              {Number(item.price || 0).toLocaleString()}đ
-            </div>
-          </div>
-          <button
-            onClick={() => remove(item.id)}
-            style={{ background: "none", border: "1px solid #ddd", padding: "5px 10px", cursor: "pointer", borderRadius: 4, color: "#dc2626", fontSize: 12 }}
-          >
-            Xoa
-          </button>
-        </div>
-      ))}
-
       {!!items.length && (
-        <div
-          style={{ marginTop: 24, display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px 0", borderTop: "2px solid #eee" }}
-        >
-          <div>
-            <b style={{ fontSize: 16 }}>Tong tien: {total.toLocaleString()}đ</b>
-            <div style={{ color: "#888", fontSize: 13, marginTop: 2 }}>
-              {items.length} khoa hoc
-            </div>
+        <>
+          <div className="cart-list">
+            {items.map((item) => (
+              <div key={item.id} className="cart-item">
+                <img
+                  src={
+                    item.thumbnailUrl ||
+                    "https://placehold.co/120x80/4f46e5/white?text=Course"
+                  }
+                  alt={item.title}
+                  className="cart-item-img"
+                />
+                <div className="cart-item-info">
+                  <b className="cart-item-title">{item.title}</b>
+                  <div className="cart-item-price">
+                    {Number(item.price || 0).toLocaleString("vi-VN")}đ
+                  </div>
+                </div>
+                <button
+                  className="cart-item-remove"
+                  onClick={() => remove(item.id)}
+                >
+                  Xóa
+                </button>
+              </div>
+            ))}
           </div>
-          <button
-            disabled={loading}
-            onClick={checkoutCart}
-            style={{ padding: "12px 28px", background: loading ? "#d1d5db" : "#2563eb", color: "#fff", border: "none", borderRadius: 6, cursor: loading ? "not-allowed" : "pointer", fontSize: 15, fontWeight: 600 }}
-          >
-            {loading ? "Dang tao don..." : "Thanh toan gio hang"}
-          </button>
-        </div>
+
+          <div className="cart-footer">
+            <div className="cart-total">
+              <span className="cart-total-label">
+                Tổng tiền ({items.length} khóa học)
+              </span>
+              <span className="cart-total-amount">
+                {total.toLocaleString("vi-VN")}đ
+              </span>
+            </div>
+            <button
+              className={`cart-checkout-btn ${loading ? "loading" : ""}`}
+              disabled={loading}
+              onClick={checkoutCart}
+            >
+              {loading ? "Đang tạo đơn..." : "Thanh toán giỏ hàng"}
+            </button>
+          </div>
+        </>
       )}
 
       {checkout && (
-        <div style={{ marginTop: 32, padding: 24, border: "1px solid #ddd", borderRadius: 12, background: "#fafafa" }}>
-          <h2 style={{ marginTop: 0 }}>Quet QR de thanh toan</h2>
-          <div style={{ display: "flex", gap: 32, flexWrap: "wrap" }}>
+        <div className="cart-qr-box">
+          <h2>Quét QR để thanh toán</h2>
+          <div className="cart-qr-content">
             <img
               src={checkout.qrImageUrl}
               alt="VietQR"
-              style={{ maxWidth: 280, width: "100%", borderRadius: 8, border: "1px solid #eee" }}
+              className="cart-qr-img"
             />
-            <div style={{ flex: 1, minWidth: 220 }}>
-              <p>
-                <b>Tong tien:</b>{" "}
-                <span style={{ color: "#e74c3c", fontWeight: 700, fontSize: 18 }}>
-                  {Number(checkout.amount || 0).toLocaleString()}đ
+            <div className="cart-qr-info">
+              <p className="cart-qr-amount">
+                <b>Tổng tiền:</b>{" "}
+                <span>
+                  {Number(checkout.amount || 0).toLocaleString("vi-VN")}đ
                 </span>
               </p>
-              <p>
-                <b>Noi dung CK:</b>{" "}
-                <code style={{ background: "#f0f4ff", padding: "4px 8px", borderRadius: 4, fontSize: 15, color: "#2563eb", fontWeight: 700 }}>
-                  {checkout.paymentCode}
-                </code>
+              <p className="cart-qr-code">
+                <b>Nội dung CK:</b> <code>{checkout.paymentCode}</code>
               </p>
+
               {checkout.orders?.length > 0 && (
-                <div style={{ marginTop: 8 }}>
-                  <b>Cac khoa hoc ({checkout.orders.length}):</b>
-                  <ul style={{ margin: "8px 0", paddingLeft: 20 }}>
+                <div className="cart-qr-orders">
+                  <b>Các khóa học ({checkout.orders.length}):</b>
+                  <ul>
                     {checkout.orders.map((order) => (
-                      <li key={order.id} style={{ marginBottom: 4, fontSize: 13 }}>
+                      <li key={order.id}>
                         {order.courseTitle} —{" "}
-                        <span style={{ color: "#e74c3c" }}>{Number(order.amount || 0).toLocaleString()}đ</span>
+                        <span>
+                          {Number(order.amount || 0).toLocaleString("vi-VN")}đ
+                        </span>
                       </li>
                     ))}
                   </ul>
                 </div>
               )}
-              <div
-                style={{ marginTop: 12, padding: 12, background: "#fffbeb", border: "1px solid #fcd34d", borderRadius: 6, fontSize: 13, color: "#92400e" }}
-              >
-                Day la thanh toan gia lap. Bam nut ben duoi sau khi da chuyen khoan de he thong gui mail kich hoat.
+
+              <div className="cart-qr-notice">
+                Đây là thanh toán giả lập. Bấm nút bên dưới sau khi đã chuyển
+                khoản để hệ thống gửi mail kích hoạt.
               </div>
+
               <button
+                className={`cart-confirm-btn ${loading ? "loading" : ""}`}
                 disabled={loading}
                 onClick={confirmPaid}
-                style={{ marginTop: 16, padding: "12px 0", background: loading ? "#d1d5db" : "#16a34a", color: "#fff", border: "none", borderRadius: 6, cursor: loading ? "not-allowed" : "pointer", fontSize: 15, fontWeight: 600, width: "100%" }}
               >
-                {loading ? "Dang xac nhan..." : "Toi da thanh toan"}
+                {loading ? "Đang xác nhận..." : "Tôi đã thanh toán"}
               </button>
             </div>
           </div>

@@ -11,11 +11,13 @@
     "mock-api": "json-server --watch db.json --port 5000"
   },
   "dependencies": {
+    "animate.css": "^4.1.1",
     "prop-types": "^15.8.1",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "react-notifications-component": "^4.0.1",
-    "react-router-dom": "^7.14.1"
+    "react-router-dom": "^7.14.1",
+    "react-toastify": "^11.1.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",

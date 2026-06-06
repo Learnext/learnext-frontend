@@ -44,7 +44,8 @@ const CourseDetail = () => {
   // Giang vien cua chinh khoa hoc nay -> cung duoc tham gia thao luan
   const isCourseInstructor =
     course?.instructorId &&
-    String(course.instructorId) === String(localStorage.getItem("instructorId"));
+    String(course.instructorId) ===
+      String(localStorage.getItem("instructorId"));
   const canParticipate = isEnrolled || isCourseInstructor;
 
   const loadFeedback = async () => {
@@ -83,9 +84,13 @@ const CourseDetail = () => {
         headers: authHeaders,
       });
       const json = await res.json();
-      setIsEnrolled((json.data || []).some((e) => String(e.courseId) === String(id)));
+      setIsEnrolled(
+        (json.data || []).some((e) => String(e.courseId) === String(id)),
+      );
     };
-    checkEnrollment().catch((err) => console.error("Check enrollment failed:", err));
+    checkEnrollment().catch((err) =>
+      console.error("Check enrollment failed:", err),
+    );
     loadFeedback().catch((err) => console.error("Load feedback failed:", err));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, id]);
@@ -171,7 +176,10 @@ const CourseDetail = () => {
       const res = await fetch(`${API}/courses/${id}/reviews`, {
         method: "POST",
         headers: { ...authHeaders, "Content-Type": "application/json" },
-        body: JSON.stringify({ rating: Number(rating), content: reviewContent }),
+        body: JSON.stringify({
+          rating: Number(rating),
+          content: reviewContent,
+        }),
       });
       const json = await res.json();
       if (!res.ok || !json.success) {
@@ -193,32 +201,53 @@ const CourseDetail = () => {
       <div key={comment.id} className={`comment-box ${nested ? "reply" : ""}`}>
         <div className="comment-header">
           <b>{comment.userName}</b>
-          <span>{comment.createdAt ? new Date(comment.createdAt).toLocaleString() : ""}</span>
+          <span>
+            {comment.createdAt
+              ? new Date(comment.createdAt).toLocaleString()
+              : ""}
+          </span>
         </div>
         <p>{comment.content}</p>
         {canParticipate && (
-          <button className="reply-toggle" onClick={() => setReplyingTo(replyingTo === comment.id ? null : comment.id)}>
+          <button
+            className="reply-toggle"
+            onClick={() =>
+              setReplyingTo(replyingTo === comment.id ? null : comment.id)
+            }
+          >
             Tra loi
           </button>
         )}
         {replyingTo === comment.id && (
-          <form className="reply-form" onSubmit={(e) => submitReply(e, comment.id, effectiveParentId)}>
+          <form
+            className="reply-form"
+            onSubmit={(e) => submitReply(e, comment.id, effectiveParentId)}
+          >
             <textarea
               value={replyContent[comment.id] || ""}
-              onChange={(e) => setReplyContent((prev) => ({ ...prev, [comment.id]: e.target.value }))}
-              placeholder={nested ? `Tra loi @${comment.userName}...` : "Nhap phan hoi..."}
+              onChange={(e) =>
+                setReplyContent((prev) => ({
+                  ...prev,
+                  [comment.id]: e.target.value,
+                }))
+              }
+              placeholder={
+                nested ? `Tra loi @${comment.userName}...` : "Nhap phan hoi..."
+              }
               rows={2}
               required
             />
-            <button type="submit">Gui phan hoi</button>
+            <button type="submit">Gửi phản hồi</button>
           </form>
         )}
-        {(comment.replies || []).map((reply) => renderComment(reply, true, rootId || comment.id))}
+        {(comment.replies || []).map((reply) =>
+          renderComment(reply, true, rootId || comment.id),
+        )}
       </div>
     );
   };
 
-  if (!course) return <h2>Dang tai chi tiet khoa hoc...</h2>;
+  if (!course) return <h2>Đang tải chi tiết khóa học...</h2>;
 
   return (
     <>
@@ -229,7 +258,8 @@ const CourseDetail = () => {
             alt={course.title}
             referrerPolicy="no-referrer"
             onError={(e) => {
-              e.target.src = "https://placehold.co/600x400/4f46e5/white?text=No+Image";
+              e.target.src =
+                "https://placehold.co/600x400/4f46e5/white?text=No+Image";
             }}
           />
         </div>
@@ -237,31 +267,45 @@ const CourseDetail = () => {
         <div className="course-detail-right">
           <h1 className="course-detail-title">{course.title}</h1>
           <p className="course-detail-desc">{course.description}</p>
-          <div className="course-detail-price">{Number(course.price || 0).toLocaleString()}d</div>
+          <div className="course-detail-price">
+            {Number(course.price || 0).toLocaleString()}d
+          </div>
 
           {isEnrolled ? (
-            <button className="course-detail-btn" onClick={() => navigate(`/course/${course.id}/learn`)}>
-              Da so huu - Vao hoc ngay
+            <button
+              className="course-detail-btn"
+              onClick={() => navigate(`/course/${course.id}/learn`)}
+            >
+              Đã mua - Học ngay
             </button>
           ) : (
             <>
-              <button className="buy-now-btn" onClick={handleBuyNow}>Mua ngay</button>
-              <button className="learn-btn" onClick={handleAddToCart}>Them vao gio hang</button>
+              <button className="buy-now-btn" onClick={handleBuyNow}>
+                Mua ngay
+              </button>
+              <button className="learn-btn" onClick={handleAddToCart}>
+                Thêm vào giỏ hàng
+              </button>
             </>
           )}
 
           {!isEnrolled && course.hasPreview && (
-            <button className="learn-btn" onClick={() => navigate(`/course/${course.id}/learn?preview=true`)}>
-              Hoc thu mien phi
+            <button
+              className="learn-btn"
+              onClick={() =>
+                navigate(`/course/${course.id}/learn?preview=true`)
+              }
+            >
+              Học thử miễn phí
             </button>
           )}
         </div>
       </div>
 
       <div className="course-feedback">
-        <h2>Binh luan va danh gia</h2>
+        <h2>Bình luận và đánh giá</h2>
         {!user ? (
-          <p>Dang nhap de xem binh luan va danh gia cua khoa hoc.</p>
+          <p>Vui lòng đăng nhập để xem bình luận và đánh giá của khóa học.</p>
         ) : (
           <>
             {canParticipate ? (
@@ -269,25 +313,38 @@ const CourseDetail = () => {
                 {/* Giang vien khong tu danh gia khoa cua minh */}
                 {isEnrolled && (
                   <form onSubmit={submitReview}>
-                    <h3>Danh gia khoa hoc</h3>
+                    <h3>Đánh giá khóa học</h3>
                     <Stars value={rating} onChange={setRating} />
-                    <textarea value={reviewContent} onChange={(e) => setReviewContent(e.target.value)} placeholder="Noi dung danh gia" rows={3} />
-                    <button type="submit">Gui danh gia</button>
+                    <textarea
+                      value={reviewContent}
+                      onChange={(e) => setReviewContent(e.target.value)}
+                      placeholder="Nội dung đánh giá"
+                      rows={3}
+                    />
+                    <button type="submit">Gửi đánh giá</button>
                   </form>
                 )}
 
                 <form onSubmit={submitComment}>
-                  <h3>{isCourseInstructor ? "Trao doi voi hoc vien" : "Binh luan"}</h3>
-                  <textarea value={commentContent} onChange={(e) => setCommentContent(e.target.value)} placeholder="Noi dung binh luan" rows={3} required />
-                  <button type="submit">Gui binh luan</button>
+                  <h3>
+                    {isCourseInstructor ? "Trao đổi với học viên" : "Bình luận"}
+                  </h3>
+                  <textarea
+                    value={commentContent}
+                    onChange={(e) => setCommentContent(e.target.value)}
+                    placeholder="Nội dung bình luận"
+                    rows={3}
+                    required
+                  />
+                  <button type="submit">Gửi bình luận</button>
                 </form>
               </div>
             ) : (
-              <p>Mua khoa hoc de duoc binh luan va danh gia.</p>
+              <p>Mua khóa học để được bình luận và đánh giá.</p>
             )}
 
             <div className="course-feedback-list">
-              <h3>Danh gia</h3>
+              <h3>Đánh giá</h3>
               {reviews.map((review) => (
                 <div key={review.id} className="course-feedback-item">
                   <div className="comment-header">
@@ -298,7 +355,7 @@ const CourseDetail = () => {
                 </div>
               ))}
 
-              <h3>Binh luan</h3>
+              <h3>Bình luận</h3>
               {comments.map((comment) => renderComment(comment))}
             </div>
           </>

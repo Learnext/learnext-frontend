@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import "./Navbar.css";
 
-import logo from "../../Assets/Frontend_Assets/logo.png";
+import logo from "../../Assets/Frontend_Assets/logo_3.png";
 
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../Features/auth/context/AuthContext";
@@ -88,8 +88,8 @@ const Navbar = () => {
     };
   }, []);
 
-  const logout = () => {
-    authLogout();
+  const logout = async () => {
+    await authLogout();
     setDropdownOpen(false);
     navigate("/");
   };
@@ -176,15 +176,10 @@ const Navbar = () => {
       {/* Right */}
       <div className="nav-login-cart">
         <Link to="/cart">
-          <button className="login-btn">Gio hang</button>
+          <button className="login-btn">Giỏ hàng</button>
         </Link>
         <ul className="nav-menu">
           {/* Nút Hỗ trợ hiển thị ở ngoài CHO KHÁCH CHƯA ĐĂNG NHẬP */}
-          {!user && (
-            <li>
-              <Link to="/support">Hỗ trợ</Link>
-            </li>
-          )}
         </ul>
 
         {user ? (
@@ -215,7 +210,9 @@ const Navbar = () => {
                 {/* Da la giang vien -> hien Dashboard; chua -> hien Dang ky */}
                 {localStorage.getItem("instructorId") ? (
                   <Link to="/instructor" onClick={() => setDropdownOpen(false)}>
-                    <div className="nav-dropdown-item">Dashboard giảng viên</div>
+                    <div className="nav-dropdown-item">
+                      Dashboard giảng viên
+                    </div>
                   </Link>
                 ) : (
                   <Link

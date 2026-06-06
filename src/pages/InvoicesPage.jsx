@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import "../pages/CSS/InvoicesPage.css";
 
 const API = "http://localhost:1201/api/v1";
 
@@ -16,19 +17,33 @@ const InvoicesPage = () => {
   }, []);
 
   return (
-    <div style={{ maxWidth: 900, margin: "32px auto", padding: 24 }}>
-      <h1>Hóa đơn của tôi</h1>
+    <div className="invoices-page">
+      <h1 className="invoices-title">Hóa đơn của tôi</h1>
       {invoices.length === 0 ? (
-        <p>Chưa có hóa đơn.</p>
+        <div className="invoices-empty">
+          <div className="empty-icon">🧾</div>
+          <p>Chưa có hóa đơn.</p>
+        </div>
       ) : (
-        invoices.map((invoice) => (
-          <div key={invoice.id} style={{ border: "1px solid #ddd", padding: 16, margin: "12px 0" }}>
-            <b>{invoice.invoiceNo}</b>
-            <p>{invoice.courseTitle}</p>
-            <p>Số tiền: {Number(invoice.amount || 0).toLocaleString()}đ</p>
-            <p>Ngày xuất: {new Date(invoice.issuedAt).toLocaleString()}</p>
-          </div>
-        ))
+        <div className="invoices-list">
+          {invoices.map((invoice) => (
+            <div key={invoice.id} className="invoice-card">
+              <div className="invoice-left">
+                <span className="invoice-no">{invoice.invoiceNo}</span>
+                <span className="invoice-course">{invoice.courseTitle}</span>
+                <span className="invoice-date">
+                  Ngày xuất:{" "}
+                  {new Date(invoice.issuedAt).toLocaleDateString("vi-VN")}
+                </span>
+              </div>
+              <div className="invoice-right">
+                <span className="invoice-amount">
+                  {Number(invoice.amount || 0).toLocaleString("vi-VN")}đ
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
       )}
     </div>
   );
