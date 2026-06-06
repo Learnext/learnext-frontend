@@ -38,7 +38,10 @@ export const useCourseManager = () => {
 
       try {
         const data = await fetchCoursesService();
-
+        console.log(
+          "Courses status:",
+          data.courses.map((c) => ({ title: c.title, status: c.status })),
+        );
         if (data.success) {
           setCourses(data.courses || []);
         }
@@ -190,10 +193,36 @@ export const useCourseManager = () => {
   // ─── Publish / Unpublish ──────────────────────────
 
   const togglePublish = async (course) => {
-    const data = await togglePublishService(course.id);
-    setCourses((prev) =>
-      prev.map((c) => (c.id === course.id ? { ...c, ...data.course } : c)),
-    );
+    try {
+      console.log(`[BƯỚC 1] Gọi API đổi trạng thái cho ID: ${course.id}`);
+
+      const resData = await togglePublishService(course.id);
+
+      console.log(`[BƯỚC 2] API đã chạy xong! Kết quả:`, resData);
+
+      // Chủ động ép trạng thái đảo ngược lại (từ Đã đăng -> Nháp và ngược lại)
+      const currentStatus = course.status?.toUpperCase() || "";
+      const newStatus =
+        currentStatus === "PUBLISHED" || currentStatus === "ACTIVE"
+          ? "DRAFT"
+          : "PUBLISHED";
+
+      setCourses((prev) =>
+        prev.map((c) => {
+          if (c.id === course.id) {
+            return { ...c, status: newStatus }; // Ghi đè trạng thái mới ngay lập tức
+          }
+          return c;
+        }),
+      );
+
+      alert(
+        `Đã đổi thành công sang: ${newStatus === "DRAFT" ? "NHÁP" : "ĐÃ ĐĂNG"}`,
+      );
+    } catch (err) {
+      console.error("[BƯỚC LỖI] Đã xảy ra lỗi hệ thống:", err);
+      alert("Lỗi: Không thể kết nối hoặc Backend từ chối. Xem Console F12.");
+    }
   };
 
   return {

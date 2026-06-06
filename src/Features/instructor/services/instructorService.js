@@ -20,22 +20,31 @@ export const instructorHeaders = (isJson = false) => {
   const instructorId =
     INSTRUCTORS[user.email] || localStorage.getItem("instructorId") || "";
 
-  console.log("Email:", user.email, "→ X-Instructor-Id:", instructorId);
-
   return {
     "X-Instructor-Id": instructorId,
     ...(isJson && { "Content-Type": "application/json" }),
   };
 };
 
+// ĐÃ SỬA: Hàm fetchApi an toàn hơn, chống Crash khi Body rỗng
 const fetchApi = async (url, options = {}) => {
   const res = await fetch(url, options);
+
   if (!res.ok) {
     const err = await res.text();
     throw new Error(`HTTP ${res.status}: ${err}`);
   }
-  const json = await res.json();
-  // BE trả về { success, data } hoặc trực tiếp object
+
+  // Đọc dữ liệu thô (text) trước thay vì ép kiểu json ngay
+  const text = await res.text();
+
+  // Nếu Backend trả về rỗng (như API đổi trạng thái), trả về object rỗng an toàn
+  if (!text || text.trim() === "") {
+    return {};
+  }
+
+  // Nếu có dữ liệu, mới tiến hành parse JSON
+  const json = JSON.parse(text);
   return json?.data !== undefined ? json.data : json;
 };
 
@@ -109,7 +118,7 @@ export const updateCourseService = async (courseId, formData) => {
   };
 
   const course = await fetchApi(`${API_URL}/instructor/courses/${courseId}`, {
-    method: "PUT", // BE dùng PUT không phải PATCH
+    method: "PUT",
     headers: instructorHeaders(true),
     body: JSON.stringify(payload),
   });
@@ -127,7 +136,6 @@ export const deleteCourseService = async (courseId) => {
 };
 
 export const togglePublishService = async (courseId) => {
-  // BE dùng PATCH /instructor/courses/{courseId}/publish
   const course = await fetchApi(
     `${API_URL}/instructor/courses/${courseId}/publish`,
     {
@@ -161,7 +169,6 @@ export const createOrderService = async (courseId) => {
   return { success: true, order };
 };
 
-// Sai — BE nhận multipart/form-data
 export const submitPaymentProofService = async (orderId, proofFile) => {
   const token = localStorage.getItem("auth-token");
   const formData = new FormData();
@@ -170,7 +177,6 @@ export const submitPaymentProofService = async (orderId, proofFile) => {
   const res = await fetch(`${API_URL}/orders/${orderId}/proof`, {
     method: "POST",
     headers: { Authorization: `Bearer ${token}` },
-    // KHÔNG set Content-Type — browser tự set boundary
     body: formData,
   });
 

@@ -72,19 +72,29 @@ const InstructorDashboard = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {stats.recentCourses.map((course) => (
-                    <tr key={course.id}>
-                      <td>{course.title}</td>
-                      <td>{course.students}</td>
-                      <td>
-                        <span
-                          className={`status-badge status-${course.status}`}
-                        >
-                          {course.status === "published" ? "Đã đăng" : "Nháp"}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
+                  {stats.recentCourses.map((course) => {
+                    // Xử lý an toàn status (chuyển về chữ hoa để so sánh)
+                    const currentStatus = course.status?.toUpperCase();
+
+                    return (
+                      <tr key={course.id}>
+                        <td>{course.title}</td>
+                        <td>{course.students}</td>
+                        <td>
+                          <span
+                            // Cập nhật class CSS thống nhất chữ thường
+                            className={`status-badge status-${course.status?.toLowerCase()}`}
+                          >
+                            {/* Kiểm tra chữ in hoa PUBLISHED hoặc ACTIVE tùy backend trả về */}
+                            {currentStatus === "PUBLISHED" ||
+                            currentStatus === "ACTIVE"
+                              ? "Đã đăng"
+                              : "Nháp"}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
