@@ -79,63 +79,40 @@ const MyCourses = () => {
         </div>
       ) : (
         <div className="my-courses-grid">
-          {courses.map((course) => (
-            // BE trả về courseId làm định danh khóa học
-            <div className="my-course-card" key={course.courseId}>
+          {courses.map((enrollment) => (
+            <div className="my-course-card" key={enrollment.id}>
               <div className="my-course-thumbnail">
                 <img
-                  src={course.thumbnailUrl}
-                  alt={course.courseTitle}
-                  referrerPolicy="no-referrer"
-                  onError={(e) => {
-                    e.target.src =
-                      "https://placehold.co/400x225/4f46e5/white?text=No+Image";
-                  }}
+                  // BE chưa trả về thumbnailUrl → dùng placeholder
+                  src="https://placehold.co/400x225/4f46e5/white?text=No+Image"
+                  alt={enrollment.courseTitle}
                 />
-                {course.progressPercent === 100 && (
-                  <div className="completed-badge">✓ Hoàn thành</div>
-                )}
               </div>
 
               <div className="my-course-body">
-                {/* Dùng courseTitle thay vì title */}
-                <h3>{course.courseTitle}</h3>
+                <h3>{enrollment.courseTitle}</h3>
 
-                {/* Kiểm tra totalLessons để hiển thị thanh tiến trình */}
-                {course.totalLessons > 0 && (
-                  <>
-                    <div className="lesson-count">
-                      <span>📖</span>
-                      <span>
-                        {course.completedLessons ?? 0}/{course.totalLessons} bài
-                        học
-                      </span>
-                    </div>
+                {/* BE chưa trả về progress — ẩn thanh tiến trình */}
 
-                    <div className="progress-bar">
-                      <div
-                        className="progress-fill"
-                        style={{ width: `${course.progressPercent ?? 0}%` }}
-                      />
-                    </div>
-
-                    <div className="progress-footer">
-                      <span className="progress-text">
-                        {course.progressPercent ?? 0}% hoàn thành
-                      </span>
-                    </div>
-                  </>
-                )}
+                <p
+                  className="enroll-date"
+                  style={{
+                    fontSize: "0.85rem",
+                    color: "#6b7280",
+                    marginBottom: "12px",
+                  }}
+                >
+                  Đã đăng ký:{" "}
+                  {new Date(enrollment.createdAt).toLocaleDateString("vi-VN")}
+                </p>
 
                 <button
                   className="continue-btn"
-                  onClick={() => navigate(`/course/${course.courseId}/learn`)}
+                  onClick={() =>
+                    navigate(`/course/${enrollment.courseId}/learn`)
+                  }
                 >
-                  {!course.progressPercent || course.progressPercent === 0
-                    ? "Bắt đầu học"
-                    : course.progressPercent === 100
-                      ? "Xem lại"
-                      : "Tiếp tục học"}
+                  Vào học
                 </button>
               </div>
             </div>

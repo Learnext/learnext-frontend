@@ -40,13 +40,7 @@ export const useCourseManager = () => {
         const data = await fetchCoursesService();
 
         if (data.success) {
-          const instructorId = localStorage.getItem("instructorId");
-
-          const myCourses = data.courses.filter(
-            (course) => String(course.instructorId) === String(instructorId),
-          );
-
-          setCourses(myCourses);
+          setCourses(data.courses || []);
         }
       } catch (err) {
         console.error("Lỗi tải khóa học:", err);
@@ -102,7 +96,7 @@ export const useCourseManager = () => {
       description: course.description || "",
       price: course.price || 0,
 
-      category: course.categoryName || "",
+      category: course.categoryName || course.category || "",
 
       thumbnailUrl: course.thumbnailUrl || "",
       previewVideoUrl: course.previewVideoUrl || "",
@@ -194,13 +188,11 @@ export const useCourseManager = () => {
     }
   };
   // ─── Publish / Unpublish ──────────────────────────
+
   const togglePublish = async (course) => {
-    const newStatus = course.status === "published" ? "draft" : "published";
-
-    const data = await togglePublishService(course.id, newStatus);
-
+    const data = await togglePublishService(course.id);
     setCourses((prev) =>
-      prev.map((c) => (c.id === course.id ? data.course : c)),
+      prev.map((c) => (c.id === course.id ? { ...c, ...data.course } : c)),
     );
   };
 

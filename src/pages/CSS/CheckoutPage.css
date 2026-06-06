@@ -298,3 +298,57 @@
     transform: translateY(0);
   }
 }
+/* ================= PROOF UPLOAD ================= */
+
+.proof-upload-section {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #e5e7eb;
+  text-align: left;
+}
+
+.proof-upload-section h4 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 12px;
+}
+
+.proof-upload-section input[type="file"] {
+  width: 100%;
+  padding: 10px 12px;
+  border: 2px dashed #d1d5db;
+  border-radius: 10px;
+  background: #f9fafb;
+  color: #6b7280;
+  font-size: 14px;
+  cursor: pointer;
+  transition: 0.2s;
+  margin-bottom: 14px;
+}
+
+.proof-upload-section input[type="file"]:hover {
+  border-color: #4f46e5;
+  background: #eef2ff;
+  color: #4f46e5;
+}
+
+.proof-upload-section .confirm-payment-btn {
+  margin-top: 0;
+  height: 50px;
+  font-size: 16px;
+  background: linear-gradient(135deg, #10b981, #059669);
+}
+
+.proof-upload-section .confirm-payment-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35);
+}
+
+.proof-upload-section .confirm-payment-btn:disabled {
+  background: #d1d5db;
+  color: #9ca3af;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}

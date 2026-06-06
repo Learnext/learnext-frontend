@@ -103,7 +103,6 @@ const Navbar = () => {
     setKeyword("");
   };
 
-  console.log("URL API đang dùng là:", import.meta.env.VITE_API_URL);
   return (
     <div className="navbar">
       {/* Logo */}
