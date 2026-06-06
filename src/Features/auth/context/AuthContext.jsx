@@ -6,9 +6,7 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
     const saved = localStorage.getItem("user");
-
     if (!saved) return null;
-
     try {
       return JSON.parse(saved);
     } catch {
@@ -18,10 +16,14 @@ export const AuthProvider = ({ children }) => {
   });
 
   const login = (token, userData) => {
+    const instructorId = localStorage.getItem("instructorId");
+
     const normalizedUser = {
       ...userData,
       isInstructor:
-        userData.role === "instructor" || userData.role === "INSTRUCTOR",
+        userData.role === "instructor" ||
+        userData.role === "INSTRUCTOR" ||
+        Boolean(instructorId),
     };
 
     localStorage.setItem("auth-token", token);
@@ -30,10 +32,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = async () => {
-    // Gọi API logout để xóa refreshToken ở backend
     await logoutService();
-
-    // Xóa user khỏi state
     setUser(null);
   };
 
