@@ -13,7 +13,8 @@ const EMPTY_FORM = {
   description: "",
   price: "",
   category: "",
-  tags: "",
+  thumbnailUrl: "",
+  previewVideoUrl: "",
   thumbnail: null,
   thumbnailPreview: null,
 };
@@ -39,10 +40,10 @@ export const useCourseManager = () => {
         const data = await fetchCoursesService();
 
         if (data.success) {
-          const user = JSON.parse(localStorage.getItem("user"));
+          const instructorId = localStorage.getItem("instructorId");
 
           const myCourses = data.courses.filter(
-            (course) => String(course.instructorId) === String(user?.id),
+            (course) => String(course.instructorId) === String(instructorId),
           );
 
           setCourses(myCourses);
@@ -99,11 +100,15 @@ export const useCourseManager = () => {
     setFormData({
       title: course.title,
       description: course.description || "",
-      price: course.price,
-      category: course.category,
-      tags: course.tags || "",
+      price: course.price || 0,
+
+      category: course.categoryName || "",
+
+      thumbnailUrl: course.thumbnailUrl || "",
+      previewVideoUrl: course.previewVideoUrl || "",
+
       thumbnail: null,
-      thumbnailPreview: course.thumbnail || null,
+      thumbnailPreview: course.thumbnailUrl || null,
     });
     setFormError("");
     setFormSuccess("");
@@ -158,7 +163,7 @@ export const useCourseManager = () => {
       const updated = data.course || {
         ...editingCourse,
         ...formData,
-        thumbnail: formData.thumbnailPreview || editingCourse.thumbnail,
+        thumbnailUrl: formData.thumbnailPreview || editingCourse.thumbnailUrl,
       };
       setCourses((prev) =>
         prev.map((c) => (c.id === editingCourse.id ? updated : c)),

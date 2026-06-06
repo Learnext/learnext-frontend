@@ -1,6 +1,7 @@
 // src/Features/instructor/components/CourseManager/CourseForm.jsx
 
 import React, { useEffect, useState } from "react";
+import { fetchCategoriesService } from "../../services/instructorService";
 
 const CourseForm = ({
   view,
@@ -15,26 +16,17 @@ const CourseForm = ({
 }) => {
   const [categories, setCategories] = useState([]);
 
-  // Load categories từ backend
+  // Load categories từ BE mới
   useEffect(() => {
     const loadCategories = async () => {
       try {
-        const res = await fetch("http://localhost:5000/categories");
-
-        if (!res.ok) {
-          setCategories([]);
-          return;
-        }
-
-        const data = await res.json();
-
-        setCategories(Array.isArray(data) ? data : []);
+        const { categories } = await fetchCategoriesService();
+        setCategories(Array.isArray(categories) ? categories : []);
       } catch (err) {
         console.error("Lỗi load categories:", err);
         setCategories([]);
       }
     };
-
     loadCategories();
   }, []);
 
@@ -45,13 +37,11 @@ const CourseForm = ({
         <button className="btn-back" onClick={onCancel}>
           ← Quay lại
         </button>
-
         <h2>{view === "create" ? "Tạo khóa học mới" : "Chỉnh sửa khóa học"}</h2>
       </div>
 
       {/* Alert */}
       {formError && <div className="form-error">✕ {formError}</div>}
-
       {formSuccess && <div className="form-success">✓ {formSuccess}</div>}
 
       {/* Form */}
@@ -65,7 +55,6 @@ const CourseForm = ({
             <label>
               Tên khóa học <span className="required">*</span>
             </label>
-
             <input
               type="text"
               name="title"
@@ -79,7 +68,6 @@ const CourseForm = ({
           {/* Description */}
           <div className="form-group">
             <label>Mô tả khóa học</label>
-
             <textarea
               name="description"
               value={formData.description || ""}
@@ -93,10 +81,8 @@ const CourseForm = ({
           <div className="form-row">
             <div className="form-group">
               <label>
-                Giá khóa học (VNĐ)
-                <span className="required">*</span>
+                Giá khóa học (VNĐ) <span className="required">*</span>
               </label>
-
               <input
                 type="number"
                 name="price"
@@ -110,10 +96,8 @@ const CourseForm = ({
 
             <div className="form-group">
               <label>
-                Danh mục
-                <span className="required">*</span>
+                Danh mục <span className="required">*</span>
               </label>
-
               <select
                 name="category"
                 value={formData.category || ""}
@@ -121,7 +105,6 @@ const CourseForm = ({
                 required
               >
                 <option value="">-- Chọn danh mục --</option>
-
                 {categories.map((cat) => (
                   <option key={cat.id} value={cat.name}>
                     {cat.name}
@@ -130,19 +113,6 @@ const CourseForm = ({
               </select>
             </div>
           </div>
-
-          {/* Tags */}
-          <div className="form-group">
-            <label>Tags</label>
-
-            <input
-              type="text"
-              name="tags"
-              value={formData.tags || ""}
-              onChange={changeHandler}
-              placeholder="VD: react, frontend, javascript"
-            />
-          </div>
         </div>
 
         {/* ================= MEDIA ================= */}
@@ -150,10 +120,9 @@ const CourseForm = ({
           <h3>Hình ảnh & Video</h3>
 
           <div className="form-row">
-            {/* Thumbnail */}
+            {/* Thumbnail upload */}
             <div className="form-group">
               <label>Thumbnail khóa học</label>
-
               <div
                 className="upload-box"
                 onClick={() =>
@@ -180,9 +149,7 @@ const CourseForm = ({
                 ) : (
                   <div className="upload-placeholder">
                     <span>🖼️</span>
-
                     <p>Click để upload thumbnail</p>
-
                     <small>JPG, PNG, WEBP — tối đa 5MB</small>
                   </div>
                 )}
@@ -196,10 +163,9 @@ const CourseForm = ({
                 style={{ display: "none" }}
               />
 
-              {/* URL ảnh */}
+              {/* Thumbnail URL */}
               <div className="form-group mt-10">
                 <label>Hoặc nhập URL ảnh</label>
-
                 <input
                   type="text"
                   name="thumbnailUrl"
@@ -210,6 +176,21 @@ const CourseForm = ({
               </div>
             </div>
           </div>
+
+          {/* Preview video URL — thêm mới theo BE */}
+          <div className="form-group">
+            <label>URL video preview</label>
+            <input
+              type="text"
+              name="previewVideoUrl"
+              value={formData.previewVideoUrl || ""}
+              onChange={changeHandler}
+              placeholder="https://example.com/preview.mp4"
+            />
+            <small className="form-hint">
+              Video ngắn giới thiệu khóa học (không bắt buộc)
+            </small>
+          </div>
         </div>
 
         {/* ================= PREVIEW ================= */}
@@ -219,7 +200,6 @@ const CourseForm = ({
           formData.price) && (
           <div className="form-section">
             <h3>Xem trước</h3>
-
             <div className="course-preview-card">
               <div className="preview-image">
                 <img
@@ -236,20 +216,16 @@ const CourseForm = ({
                   }}
                 />
               </div>
-
               <div className="preview-content">
                 <h4>{formData.title || "Tên khóa học sẽ hiển thị ở đây"}</h4>
-
                 <p>
                   {formData.description || "Mô tả khóa học sẽ hiển thị ở đây"}
                 </p>
-
                 <div className="preview-price">
                   {formData.price
                     ? `${Number(formData.price).toLocaleString("vi-VN")}đ`
                     : "0đ"}
                 </div>
-
                 {formData.category && (
                   <div className="preview-category">{formData.category}</div>
                 )}
@@ -268,7 +244,6 @@ const CourseForm = ({
           >
             Hủy
           </button>
-
           <button type="submit" className="btn-save" disabled={formLoading}>
             {formLoading
               ? "Đang lưu..."

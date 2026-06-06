@@ -1,9 +1,13 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap");
+
+/* Reset cơ bản */
 * {
   margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 body {
-  margin: 0;
   font-family:
     "Poppins",
     -apple-system,
@@ -16,7 +20,15 @@ body {
     "Droid Sans",
     "Helvetica Neue",
     sans-serif;
-
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: #f8f9fa; /* Màu nền xám nhạt mặc định cho toàn hệ thống */
+  color: #333;
+}
+
+/* Các biến màu sắc hệ thống dùng chung (Nếu có) */
+:root {
+  --primary-color: #ff4141; /* Màu đỏ chủ đạo của Learnext */
+  --text-color: #333333;
+  --border-color: #e3e3e3;
 }

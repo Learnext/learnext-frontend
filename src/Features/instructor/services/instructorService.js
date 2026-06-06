@@ -1,37 +1,37 @@
-import { FAKE_STATS } from "../mock/stats.mock";
+const rawApiUrl = import.meta.env.VITE_API_URL;
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
-
-const delay = (ms = 500) => new Promise((resolve) => setTimeout(resolve, ms));
+const API_URL = rawApiUrl
+  ? rawApiUrl.endsWith("/api/v1")
+    ? rawApiUrl
+    : `${rawApiUrl}/api/v1`
+  : "http://localhost:1201/api/v1";
 
 export const authHeaders = (isJson = false) => {
   const token = localStorage.getItem("auth-token");
+  return {
+    ...(token && { Authorization: `Bearer ${token}` }),
+    ...(isJson && { "Content-Type": "application/json" }),
+  };
+};
+
+export const instructorHeaders = (isJson = false) => {
+  const instructorId = localStorage.getItem("instructorId");
 
   return {
-    ...(token && {
-      Authorization: `Bearer ${token}`,
-    }),
-
-    ...(isJson && {
-      "Content-Type": "application/json",
-    }),
+    "X-Instructor-Id": instructorId || "",
+    ...(isJson && { "Content-Type": "application/json" }),
   };
 };
 
 const fetchApi = async (url, options = {}) => {
-  console.log("CALL API:", url);
-
   const res = await fetch(url, options);
-
   if (!res.ok) {
     const err = await res.text();
-
-    console.error("SERVER ERROR:", err);
-
-    throw new Error(`HTTP ${res.status}`);
+    throw new Error(`HTTP ${res.status}: ${err}`);
   }
-
-  return await res.json();
+  const json = await res.json();
+  // BE trả về { success, data } hoặc trực tiếp object
+  return json?.data !== undefined ? json.data : json;
 };
 
 //
@@ -40,35 +40,25 @@ const fetchApi = async (url, options = {}) => {
 
 export const fetchStatsService = async () => {
   try {
-    const courses = await fetchApi(`${API_URL}/courses`, {
-      headers: authHeaders(),
+    const courses = await fetchApi(`${API_URL}/instructor/courses`, {
+      headers: instructorHeaders(),
     });
 
     return {
       success: true,
-
       stats: {
         totalCourses: courses.length,
-
         totalStudents: courses.reduce((sum, c) => sum + (c.students || 0), 0),
-
         totalRevenue: courses.reduce(
           (sum, c) => sum + (c.price || 0) * (c.students || 0),
           0,
         ),
-
         recentCourses: courses.slice(-5).reverse(),
       },
     };
   } catch (err) {
     console.error(err);
-
-    await delay();
-
-    return {
-      success: true,
-      stats: FAKE_STATS,
-    };
+    return { success: false, stats: null };
   }
 };
 
@@ -77,37 +67,26 @@ export const fetchStatsService = async () => {
 //
 
 export const fetchCoursesService = async () => {
-  const courses = await fetchApi(`${API_URL}/courses`, {
-    headers: authHeaders(),
+  const courses = await fetchApi(`${API_URL}/instructor/courses`, {
+    headers: instructorHeaders(),
   });
 
-  return {
-    success: true,
-    courses,
-  };
+  return { success: true, courses };
 };
 
 export const createCourseService = async (formData) => {
-  const user = JSON.parse(localStorage.getItem("user"));
-
-  const thumbnail = formData.thumbnailUrl || null;
-
   const payload = {
     title: formData.title,
-    description: formData.description,
-    price: Number(formData.price),
+    description: formData.description || "",
+    price: Number(formData.price) || 0,
     category: formData.category,
-    instructorId: user.id,
-    tags: formData.tags,
-    thumbnail,
-    status: "draft",
-    students: 0,
-    created_at: new Date().toISOString().split("T")[0],
+    thumbnailUrl: formData.thumbnailUrl || "",
+    previewVideoUrl: formData.previewVideoUrl || "",
   };
 
-  const course = await fetchApi(`${API_URL}/courses`, {
+  const course = await fetchApi(`${API_URL}/instructor/courses`, {
     method: "POST",
-    headers: authHeaders(true),
+    headers: instructorHeaders(true),
     body: JSON.stringify(payload),
   });
 
@@ -117,17 +96,16 @@ export const createCourseService = async (formData) => {
 export const updateCourseService = async (courseId, formData) => {
   const payload = {
     title: formData.title,
-    description: formData.description,
-    price: Number(formData.price),
+    description: formData.description || "",
+    price: Number(formData.price) || 0,
     category: formData.category,
-    tags: formData.tags,
-    // Ưu tiên URL nhập tay, nếu không có dùng preview cũ (URL thật từ server)
-    thumbnail: formData.thumbnailUrl || formData.thumbnailPreview || null,
+    thumbnailUrl: formData.thumbnailUrl || formData.thumbnailPreview || "",
+    previewVideoUrl: formData.previewVideoUrl || null,
   };
 
-  const course = await fetchApi(`${API_URL}/courses/${courseId}`, {
-    method: "PATCH",
-    headers: authHeaders(true),
+  const course = await fetchApi(`${API_URL}/instructor/courses/${courseId}`, {
+    method: "PUT", // BE dùng PUT không phải PATCH
+    headers: instructorHeaders(true),
     body: JSON.stringify(payload),
   });
 
@@ -135,252 +113,181 @@ export const updateCourseService = async (courseId, formData) => {
 };
 
 export const deleteCourseService = async (courseId) => {
-  await fetchApi(`${API_URL}/courses/${courseId}`, {
+  await fetchApi(`${API_URL}/instructor/courses/${courseId}`, {
     method: "DELETE",
-
-    headers: authHeaders(),
+    headers: instructorHeaders(),
   });
 
-  return {
-    success: true,
-  };
+  return { success: true };
 };
 
-//
-// CONTENT
-//
-
-export const fetchContentService = async (courseId) => {
-  const chapters = await fetchApi(`${API_URL}/chapters`, {
-    headers: authHeaders(),
-  });
-
-  const sections = await fetchApi(`${API_URL}/sections`, {
-    headers: authHeaders(),
-  });
-
-  const lessons = await fetchApi(`${API_URL}/lessons`, {
-    headers: authHeaders(),
-  });
-
-  // lọc theo khóa học
-  const courseChapters = chapters.filter(
-    (chapter) => chapter.courseId === courseId,
+export const togglePublishService = async (courseId) => {
+  // BE dùng PATCH /instructor/courses/{courseId}/publish
+  const course = await fetchApi(
+    `${API_URL}/instructor/courses/${courseId}/publish`,
+    {
+      method: "PATCH",
+      headers: instructorHeaders(),
+    },
   );
 
-  const courseSections = sections.filter(
-    (section) => section.courseId === courseId,
+  return { success: true, course };
+};
+
+//
+// ORDERS (user)
+//
+
+export const fetchOrdersService = async () => {
+  const orders = await fetchApi(`${API_URL}/orders`, {
+    headers: authHeaders(),
+  });
+
+  return { success: true, orders };
+};
+
+export const createOrderService = async (courseId) => {
+  const order = await fetchApi(`${API_URL}/orders`, {
+    method: "POST",
+    headers: authHeaders(true),
+    body: JSON.stringify({ courseId }),
+  });
+
+  return { success: true, order };
+};
+
+export const submitPaymentProofService = async (orderId, paymentProofUrl) => {
+  const order = await fetchApi(`${API_URL}/orders/${orderId}/proof`, {
+    method: "POST",
+    headers: authHeaders(true),
+    body: JSON.stringify({ paymentProofUrl }),
+  });
+
+  return { success: true, order };
+};
+
+//
+// ENROLLMENTS
+//
+
+export const fetchEnrollmentsService = async () => {
+  const enrollments = await fetchApi(`${API_URL}/learning/enrollments`, {
+    headers: authHeaders(),
+  });
+
+  return { success: true, enrollments };
+};
+
+export const checkCourseAccessService = async (courseId) => {
+  const data = await fetchApi(
+    `${API_URL}/learning/courses/${courseId}/access`,
+    { headers: authHeaders() },
   );
 
-  const courseLessons = lessons.filter(
-    (lesson) => lesson.courseId === courseId,
-  );
-
-  const mappedSections = courseSections.map((section) => ({
-    ...section,
-
-    lessons: courseLessons.filter((lesson) => lesson.sectionId === section.id),
-  }));
-
-  const mappedChapters = courseChapters.map((chapter) => ({
-    ...chapter,
-
-    sections: mappedSections.filter(
-      (section) => section.chapterId === chapter.id,
-    ),
-  }));
-
-  return {
-    success: true,
-    chapters: mappedChapters,
-  };
+  return { success: true, ...data };
 };
 
-//
-// CHAPTER
-//
-
-export const createChapterService = async (courseId, title) => {
-  const chapter = await fetchApi(`${API_URL}/chapters`, {
+export const completeLessonService = async (courseId, lessonId) => {
+  await fetchApi(`${API_URL}/learning/courses/${courseId}/complete`, {
     method: "POST",
     headers: authHeaders(true),
-
-    body: JSON.stringify({
-      courseId,
-      title,
-      order: 1,
-    }),
+    body: JSON.stringify({ lessonId }),
   });
 
-  return {
-    success: true,
-    chapter,
-  };
+  return { success: true };
 };
 
-export const updateChapterService = async (courseId, chapterId, title) => {
-  const chapter = await fetchApi(`${API_URL}/chapters/${chapterId}`, {
-    method: "PATCH",
+//
+// FAVORITES
+//
 
-    headers: authHeaders(true),
-
-    body: JSON.stringify({
-      courseId,
-
-      title,
-    }),
-  });
-
-  return {
-    success: true,
-    chapter,
-  };
-};
-
-export const deleteChapterService = async (_, chapterId) => {
-  await fetchApi(`${API_URL}/chapters/${chapterId}`, {
-    method: "DELETE",
-
+export const fetchFavoritesService = async () => {
+  const favorites = await fetchApi(`${API_URL}/favorites`, {
     headers: authHeaders(),
   });
 
-  return {
-    success: true,
-  };
+  return { success: true, favorites };
 };
 
-//
-// SECTION
-//
-
-export const createSectionService = async (courseId, chapterId, title) => {
-  const section = await fetchApi(`${API_URL}/sections`, {
+export const addFavoriteService = async (courseId) => {
+  await fetchApi(`${API_URL}/favorites/${courseId}`, {
     method: "POST",
-    headers: authHeaders(true),
-
-    body: JSON.stringify({
-      courseId,
-      chapterId,
-      title,
-      order: 1,
-    }),
-  });
-
-  return {
-    success: true,
-    section,
-  };
-};
-
-export const updateSectionService = async (
-  courseId,
-  chapterId,
-  sectionId,
-  title,
-) => {
-  const section = await fetchApi(`${API_URL}/sections/${sectionId}`, {
-    method: "PATCH",
-
-    headers: authHeaders(true),
-
-    body: JSON.stringify({
-      courseId,
-
-      chapterId,
-
-      title,
-    }),
-  });
-
-  return {
-    success: true,
-    section,
-  };
-};
-
-export const deleteSectionService = async (_, __, sectionId) => {
-  await fetchApi(`${API_URL}/sections/${sectionId}`, {
-    method: "DELETE",
-
     headers: authHeaders(),
   });
 
-  return {
-    success: true,
-  };
+  return { success: true };
 };
 
-//
-// LESSON
-//
-
-export const createLessonService = async (courseId, sectionId, formData) => {
-  const lesson = await fetchApi(`${API_URL}/lessons`, {
-    method: "POST",
-    headers: authHeaders(true),
-
-    body: JSON.stringify({
-      courseId,
-      sectionId,
-      title: formData.title,
-      type: formData.type,
-      file: formData.videoUrl || formData.fileName || "",
-      duration: formData.duration || "10:00",
-    }),
-  });
-
-  return {
-    success: true,
-    lesson,
-  };
-};
-
-export const updateLessonService = async (
-  courseId,
-  sectionId,
-  lessonId,
-  formData,
-) => {
-  const lesson = await fetchApi(`${API_URL}/lessons/${lessonId}`, {
-    method: "PATCH",
-    headers: authHeaders(true),
-
-    body: JSON.stringify({
-      courseId,
-      sectionId,
-      title: formData.title,
-      type: formData.type,
-      file: formData.videoUrl || formData.fileName || "",
-    }),
-  });
-
-  return {
-    success: true,
-    lesson,
-  };
-};
-
-export const deleteLessonService = async (courseId, sectionId, lessonId) => {
-  await fetchApi(`${API_URL}/lessons/${lessonId}`, {
+export const removeFavoriteService = async (courseId) => {
+  await fetchApi(`${API_URL}/favorites/${courseId}`, {
     method: "DELETE",
     headers: authHeaders(),
   });
 
-  return {
-    success: true,
-  };
+  return { success: true };
 };
-export const togglePublishService = async (courseId, status) => {
-  const course = await fetchApi(`${API_URL}/courses/${courseId}`, {
-    method: "PATCH",
+
+//
+// REVIEWS & COMMENTS
+//
+
+export const createReviewService = async (courseId, rating, content) => {
+  const review = await fetchApi(`${API_URL}/courses/${courseId}/reviews`, {
+    method: "POST",
     headers: authHeaders(true),
-    body: JSON.stringify({
-      status,
-    }),
+    body: JSON.stringify({ rating, content }),
   });
 
-  return {
-    success: true,
-    course,
-  };
+  return { success: true, review };
+};
+
+export const createCommentService = async (courseId, content) => {
+  const comment = await fetchApi(`${API_URL}/courses/${courseId}/comments`, {
+    method: "POST",
+    headers: authHeaders(true),
+    body: JSON.stringify({ content }),
+  });
+
+  return { success: true, comment };
+};
+
+//
+// ACTIVATION
+//
+
+export const activateCourseService = async (activationCode) => {
+  const data = await fetchApi(`${API_URL}/activations/activate`, {
+    method: "POST",
+    headers: authHeaders(true),
+    body: JSON.stringify({ activationCode }),
+  });
+
+  return { success: true, ...data };
+};
+
+//
+// PUBLIC COURSES
+//
+
+export const fetchPublicCoursesService = async (params = {}) => {
+  const query = new URLSearchParams();
+  if (params.q) query.set("q", params.q);
+  if (params.categoryId) query.set("categoryId", params.categoryId);
+  if (params.minPrice) query.set("minPrice", params.minPrice);
+  if (params.maxPrice) query.set("maxPrice", params.maxPrice);
+  if (params.sort) query.set("sort", params.sort);
+
+  const courses = await fetchApi(`${API_URL}/courses?${query.toString()}`);
+
+  return { success: true, courses };
+};
+
+export const fetchCourseDetailService = async (courseId) => {
+  const course = await fetchApi(`${API_URL}/courses/${courseId}`);
+  return { success: true, course };
+};
+
+export const fetchCategoriesService = async () => {
+  const categories = await fetchApi(`${API_URL}/categories`);
+  return { success: true, categories };
 };

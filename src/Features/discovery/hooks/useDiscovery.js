@@ -1,58 +1,39 @@
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import debounce from "lodash/debounce";
-import { useCourses } from "./useCourses";
+import { searchCoursesService } from "../services/discoveryService";
 
 export const useDiscovery = () => {
-  const { courses } = useCourses(); // ← không tự fetch nữa
-  const [filtered, setFiltered] = useState([]);
+  const [courses, setCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
+
   const [keyword, setKeyword] = useState("");
-  const [category, setCategory] = useState("all");
+  const [categoryId, setCategoryId] = useState("all");
 
-  // Sync filtered khi courses load xong
+  // Hàm trung gian quản lý loading và gọi Service
+  const fetchCourses = async (searchKeyword, searchCategoryId) => {
+    setLoading(true);
+    try {
+      const data = await searchCoursesService(searchKeyword, searchCategoryId);
+      setCourses(data);
+    } catch (err) {
+      console.error("Lỗi fetch search:", err);
+      setCourses([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Debounce API call để tránh spam server khi gõ phím liên tục
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const debouncedFetch = useCallback(
+    debounce((k, c) => fetchCourses(k, c), 500),
+    [],
+  );
+
+  // Lắng nghe sự thay đổi của keyword và categoryId để kích hoạt tìm kiếm
   useEffect(() => {
-    setFiltered(courses);
-  }, [courses]);
+    debouncedFetch(keyword, categoryId);
+  }, [keyword, categoryId, debouncedFetch]);
 
-  const filterCourses = useCallback(
-    (searchKeyword, selectedCategory) => {
-      let result = [...courses];
-      if (searchKeyword.trim()) {
-        result = result.filter((c) =>
-          c.title.toLowerCase().includes(searchKeyword.toLowerCase()),
-        );
-      }
-      if (selectedCategory !== "all") {
-        result = result.filter((c) => c.category === selectedCategory);
-      }
-      setFiltered(result);
-    },
-    [courses],
-  );
-
-  // useRef để debounce không bị tạo lại
-  const debouncedSearch = useRef(
-    debounce((value, cat, filterFn) => {
-      filterFn(value, cat);
-    }, 300),
-  ).current;
-
-  useEffect(() => () => debouncedSearch.cancel(), []);
-
-  const search = useCallback(
-    (value) => {
-      setKeyword(value);
-      debouncedSearch(value, category, filterCourses);
-    },
-    [category, filterCourses],
-  );
-
-  const filterCategory = useCallback(
-    (value) => {
-      setCategory(value);
-      filterCourses(keyword, value);
-    },
-    [keyword, filterCourses],
-  );
-
-  return { filtered, keyword, category, search, filterCategory };
+  return { courses, loading, keyword, setKeyword, categoryId, setCategoryId };
 };

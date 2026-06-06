@@ -5,33 +5,38 @@ const API_URL = rawApiUrl
     : `${rawApiUrl}/api/v1`
   : "";
 
-const delay = (ms = 800) => new Promise((resolve) => setTimeout(resolve, ms));
-
 const unwrap = (payload) => {
   if (payload && typeof payload === "object" && "success" in payload) {
     return payload.data;
   }
-
   return payload;
 };
 
+export const fetchProfile = async () => {
+  const token = localStorage.getItem("auth-token");
+  if (!token || !API_URL) return null;
+
+  const res = await fetch(`${API_URL}/profile/me`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  const payload = await res.json();
+  if (!res.ok) throw new Error(payload?.message || "Load profile failed");
+
+  return unwrap(payload);
+};
+
 export const updateProfile = async (formData, authUser) => {
+  // Chuẩn bị payload gửi lên BE (Đã thêm expertise và bỏ username)
   const requestBody = {
-    fullName: formData.fullName || formData.username || authUser?.fullName || authUser?.username,
+    fullName: formData.fullName || authUser?.fullName || "",
     phone: formData.phone || "",
     bio: formData.bio || "",
+    expertise: formData.expertise || "", // Quan trọng: Đã bổ sung trường này!
   };
 
   if (!API_URL) {
-    await delay();
-
-    return {
-      success: true,
-      user: {
-        ...authUser,
-        ...formData,
-      },
-    };
+    return { success: true, user: { ...authUser, ...formData } };
   }
 
   const response = await fetch(`${API_URL}/profile/me`, {
@@ -46,15 +51,18 @@ export const updateProfile = async (formData, authUser) => {
   const payload = await response.json();
 
   if (!response.ok) {
-    throw new Error(payload?.error?.message || payload?.message || "Update failed");
+    throw new Error(
+      payload?.error?.message || payload?.message || "Update failed",
+    );
   }
 
+  // Cập nhật lại Auth Context
   return {
     success: true,
     user: {
       ...authUser,
       ...unwrap(payload),
-      username: unwrap(payload)?.fullName || authUser?.username,
+      fullName: unwrap(payload)?.fullName || authUser?.fullName, // Trả về fullName chuẩn
     },
   };
 };

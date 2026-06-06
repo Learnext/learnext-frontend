@@ -11,20 +11,20 @@ import {
 } from "react-router-dom";
 
 import Shop from "./pages/Shop.jsx";
-import Cart from "./pages/Cart.jsx";
+
 import CourseDetail from "./pages/CourseDetail.jsx";
 import SearchPage from "./pages/SearchPage.jsx";
-
+import Support from "./Features/support/pages/Support.jsx";
 import LoginSignup from "./Features/auth/pages/LoginSignup.jsx";
 import Profile from "./Features/profile/pages/Profile.jsx";
-import Support from "./Features/support/pages/Support.jsx";
+
 import CheckoutPage from "./pages/CheckoutPage.jsx";
 import LearningPage from "./pages/LearningPage.jsx";
 import MyCourses from "./pages/MyCourses.jsx";
 import InstructorLayout from "./Features/instructor/components/InstructorLayout.jsx";
 import InstructorDashboard from "./Features/instructor/pages/InstructorDashboard.jsx";
 import CourseManager from "./Features/instructor/pages/CourseManager.jsx";
-import CourseContent from "./Features/instructor/pages/CourseContent.jsx";
+//import CourseContent from "./Features/instructor/pages/CourseContent.jsx";
 
 function AppContent() {
   const location = useLocation();
@@ -45,9 +45,9 @@ function AppContent() {
         <Routes>
           <Route path="/" element={<Shop />} />
 
-          <Route path="/cart" element={<Cart />} />
           <Route path="/login" element={<LoginSignup />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/support" element={<Support />} />
           <Route path="/course/:id" element={<CourseDetail />} />
           <Route path="/course/:courseId/learn" element={<LearningPage />} />
           <Route path="/my-courses" element={<MyCourses />} />
@@ -57,10 +57,6 @@ function AppContent() {
           <Route path="/instructor" element={<InstructorLayout />}>
             <Route index element={<InstructorDashboard />} />
             <Route path="courses" element={<CourseManager />} />
-            <Route
-              path="courses/:courseId/content"
-              element={<CourseContent />}
-            />
           </Route>
         </Routes>
       </div>

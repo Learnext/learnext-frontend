@@ -1,4 +1,10 @@
-const API_URL = import.meta.env.VITE_API_URL;
+import { INSTRUCTORS } from "../../../config/instructors";
+const rawApiUrl = import.meta.env.VITE_API_URL;
+const API_URL = rawApiUrl
+  ? rawApiUrl.endsWith("/api/v1")
+    ? rawApiUrl
+    : `${rawApiUrl}/api/v1`
+  : "http://localhost:1201/api/v1";
 
 const request = async (url, options = {}) => {
   const response = await fetch(url, options);
@@ -6,67 +12,100 @@ const request = async (url, options = {}) => {
   const data = await response.json();
 
   if (!response.ok) {
-    throw new Error(data.message || "Request failed");
+    console.log("API ERROR:", data);
+
+    throw new Error(
+      data.message || data.error?.message || JSON.stringify(data),
+    );
   }
 
   return data;
 };
 
 export const loginService = async (email, password) => {
-  const users = await request(`${API_URL}/users`);
+  const response = await request(`${API_URL}/auth/login`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      email,
+      password,
+    }),
+  });
 
-  const user = users.find(
-    (u) =>
-      u.email.trim().toLowerCase() === email.trim().toLowerCase() &&
-      u.password === password,
-  );
+  const tokenData = response.data || response;
 
-  if (!user) {
-    return {
-      success: false,
-      message: "Sai email hoặc mật khẩu",
-    };
+  const { accessToken, refreshToken } = tokenData;
+
+  localStorage.setItem("auth-token", accessToken);
+  localStorage.setItem("refreshToken", refreshToken);
+
+  const profileRes = await fetch(`${API_URL}/profile/me`, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+
+  const profileJson = await profileRes.json();
+
+  const profile = profileJson.data || profileJson;
+
+  const payload = JSON.parse(atob(accessToken.split(".")[1]));
+
+  const user = {
+    ...profile,
+    id: payload.sub || payload.userId || payload.id,
+  };
+  const instructorId = INSTRUCTORS[user.email];
+
+  if (instructorId) {
+    localStorage.setItem("instructorId", instructorId);
+  } else {
+    localStorage.removeItem("instructorId");
   }
-
   return {
     success: true,
-    token: "fake-jwt-token",
+    token: accessToken,
     user,
   };
 };
 
 export const signupService = async (formData) => {
-  const users = await request(`${API_URL}/users`);
-
-  const exists = users.find(
-    (u) => u.email.trim().toLowerCase() === formData.email.trim().toLowerCase(),
-  );
-
-  if (exists) {
-    return {
-      success: false,
-      message: "Email đã tồn tại",
-    };
-  }
-
-  const newUser = {
-    username: formData.username,
-    email: formData.email,
-    password: formData.password,
-    role: "user",
-  };
-
-  const createdUser = await request(`${API_URL}/users`, {
+  await request(`${API_URL}/auth/register`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(newUser),
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      email: formData.email,
+      password: formData.password,
+      fullName: formData.username || formData.fullName || "",
+    }),
   });
 
-  return {
-    success: true,
-    token: "fake-jwt-token",
-    user: createdUser,
-  };
+  // Sau khi đăng ký, tự động login luôn
+  return await loginService(formData.email, formData.password);
+};
+
+export const logoutService = async () => {
+  const refreshToken = localStorage.getItem("refreshToken");
+
+  if (refreshToken) {
+    try {
+      await fetch(`${API_URL}/auth/logout`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("auth-token")}`,
+        },
+        body: JSON.stringify({ refreshToken }),
+      });
+    } catch {
+      // Bỏ qua lỗi logout
+    }
+  }
+
+  localStorage.removeItem("auth-token");
+  localStorage.removeItem("accessToken");
+  localStorage.removeItem("refreshToken");
+  localStorage.removeItem("user");
 };

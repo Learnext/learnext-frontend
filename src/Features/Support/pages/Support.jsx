@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { createSupportLead } from "../services/supportService";
+import { useAuth } from "../../auth/context/AuthContext"; // Import AuthContext
 import "../styles/Support.css";
 
 const CATEGORIES = [
@@ -11,26 +12,30 @@ const CATEGORIES = [
 ];
 
 const Support = () => {
+  const { user } = useAuth(); // Lấy thông tin user nếu đã đăng nhập
+
   const [formData, setFormData] = useState({
-    name: "",
+    fullName: "",
     email: "",
     category: "",
     subject: "",
-    message: "",
+    content: "", // Đổi message -> content cho chuẩn API
   });
+
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [submitError, setSubmitError] = useState("");
-  const [tickets, setTickets] = useState([
-    // Mock ticket history
-    {
-      id: "TK-001",
-      subject: "Không xem được video bài học",
-      category: "technical",
-      status: "resolved",
-      date: "20/04/2026",
-    },
-  ]);
+
+  // Tự động điền thông tin nếu User đã đăng nhập
+  useEffect(() => {
+    if (user) {
+      setFormData((prev) => ({
+        ...prev,
+        fullName: user.fullName || "",
+        email: user.email || "",
+      }));
+    }
+  }, [user]);
 
   const changeHandler = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -42,45 +47,21 @@ const Support = () => {
     setSubmitError("");
 
     try {
-      const lead = await createSupportLead(formData);
-      const newTicket = {
-        id: lead.id ? String(lead.id).slice(0, 8).toUpperCase() : `TK-00${tickets.length + 2}`,
-        subject: lead.subject || formData.subject,
-        category: lead.category || formData.category,
-        status: "pending",
-        date: new Date(lead.createdAt || Date.now()).toLocaleDateString("vi-VN"),
-      };
-
-      setTickets([newTicket, ...tickets]);
+      await createSupportLead(formData);
       setSubmitted(true);
+
+      // Reset form (giữ lại tên và email nếu là user đã login)
       setFormData({
-        name: "",
-        email: "",
+        fullName: user?.fullName || "",
+        email: user?.email || "",
         category: "",
         subject: "",
-        message: "",
+        content: "",
       });
     } catch (error) {
       setSubmitError(error.message || "Không thể gửi yêu cầu hỗ trợ");
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleNewTicket = () => {
-    setSubmitted(false);
-  };
-
-  const statusLabel = (status) => {
-    switch (status) {
-      case "pending":
-        return { text: "Đang xử lý", cls: "status-pending" };
-      case "resolved":
-        return { text: "Đã giải quyết", cls: "status-resolved" };
-      case "closed":
-        return { text: "Đã đóng", cls: "status-closed" };
-      default:
-        return { text: status, cls: "" };
     }
   };
 
@@ -91,7 +72,7 @@ const Support = () => {
         <div className="support-left">
           <div className="support-header">
             <h1>Hỗ trợ</h1>
-            <p>Chúng tôi thường phản hồi trong vòng 24 giờ</p>
+            <p>Chúng tôi thường phản hồi qua Email trong vòng 24 giờ</p>
           </div>
 
           {submitted ? (
@@ -99,10 +80,14 @@ const Support = () => {
               <div className="success-icon">✓</div>
               <h3>Đã gửi yêu cầu hỗ trợ!</h3>
               <p>
-                Chúng tôi sẽ phản hồi qua email của bạn trong vòng 24 giờ làm
-                việc.
+                Cảm ơn bạn. Đội ngũ Admin của Learnext sẽ kiểm tra và phản hồi
+                lại bạn qua địa chỉ email <strong>{formData.email}</strong>{" "}
+                trong thời gian sớm nhất.
               </p>
-              <button className="btn-new-ticket" onClick={handleNewTicket}>
+              <button
+                className="btn-new-ticket"
+                onClick={() => setSubmitted(false)}
+              >
                 Gửi yêu cầu mới
               </button>
             </div>
@@ -112,11 +97,12 @@ const Support = () => {
                 <div className="form-group">
                   <label>Họ và tên *</label>
                   <input
-                    name="name"
-                    value={formData.name}
+                    name="fullName"
+                    value={formData.fullName}
                     onChange={changeHandler}
                     placeholder="Nhập họ và tên"
                     required
+                    disabled={!!user} // Khóa ô nếu đã auto-fill từ Auth
                   />
                 </div>
                 <div className="form-group">
@@ -128,6 +114,7 @@ const Support = () => {
                     type="email"
                     placeholder="Nhập email"
                     required
+                    disabled={!!user} // Khóa ô nếu đã auto-fill từ Auth
                   />
                 </div>
               </div>
@@ -161,10 +148,10 @@ const Support = () => {
               </div>
 
               <div className="form-group">
-                <label>Nội dung *</label>
+                <label>Nội dung chi tiết *</label>
                 <textarea
-                  name="message"
-                  value={formData.message}
+                  name="content"
+                  value={formData.content}
                   onChange={changeHandler}
                   placeholder="Mô tả chi tiết vấn đề bạn gặp phải..."
                   rows={5}
@@ -180,43 +167,16 @@ const Support = () => {
           )}
         </div>
 
-        {/* Right: Ticket history + FAQ */}
+        {/* Right: FAQ (Đã xóa Ticket History) */}
         <div className="support-right">
-          {/* Ticket history */}
-          <div className="ticket-history">
-            <h3>Lịch sử yêu cầu</h3>
-            {tickets.length === 0 ? (
-              <p className="no-tickets">Chưa có yêu cầu nào.</p>
-            ) : (
-              <div className="ticket-list">
-                {tickets.map((t) => {
-                  const s = statusLabel(t.status);
-                  return (
-                    <div key={t.id} className="ticket-item">
-                      <div className="ticket-top">
-                        <span className="ticket-id">{t.id}</span>
-                        <span className={`ticket-status ${s.cls}`}>
-                          {s.text}
-                        </span>
-                      </div>
-                      <p className="ticket-subject">{t.subject}</p>
-                      <span className="ticket-date">{t.date}</span>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-
-          {/* FAQ quick links */}
           <div className="faq-section">
             <h3>Câu hỏi thường gặp</h3>
             <ul className="faq-list">
-              <li>Làm thế nào để đăng ký khóa học?</li>
+              <li>Làm thế nào để kích hoạt khóa học?</li>
+              <li>Tại sao tài khoản của tôi chưa được duyệt học?</li>
+              <li>Tôi muốn đăng ký làm giảng viên?</li>
               <li>Chính sách hoàn tiền như thế nào?</li>
-              <li>Tôi có thể xem video offline không?</li>
-              <li>Làm sao để liên hệ giảng viên?</li>
-              <li>Chứng chỉ có giá trị không?</li>
+              <li>Làm sao để lấy lại mật khẩu?</li>
             </ul>
           </div>
         </div>

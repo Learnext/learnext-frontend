@@ -1,4 +1,5 @@
 import { createContext, useContext, useState } from "react";
+import { logoutService } from "../services/authService";
 
 const AuthContext = createContext();
 
@@ -17,22 +18,17 @@ export const AuthProvider = ({ children }) => {
   });
 
   const login = (token, userData) => {
-    const normalizedUser = {
-      ...userData,
-      isInstructor: userData.role === "instructor",
-    };
-
     localStorage.setItem("auth-token", token);
-    localStorage.setItem("user", JSON.stringify(normalizedUser));
+    localStorage.setItem("user", JSON.stringify(userData));
 
-    setUser(normalizedUser);
+    setUser(userData);
   };
 
-  const logout = () => {
-    localStorage.removeItem("auth-token");
-    localStorage.removeItem("user");
-    window.dispatchEvent(new Event("cartUpdated"));
-    localStorage.removeItem("guest-cart");
+  const logout = async () => {
+    // Gọi API logout để xóa refreshToken ở backend
+    await logoutService();
+
+    // Xóa user khỏi state
     setUser(null);
   };
 

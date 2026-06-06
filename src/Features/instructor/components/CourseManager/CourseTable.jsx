@@ -24,8 +24,8 @@ const CourseTable = ({ courses, onEdit, onDelete, onTogglePublish }) => {
               <td>
                 <div className="course-title-cell">
                   <div className="course-thumb-small">
-                    {course.thumbnail ? (
-                      <img src={course.thumbnail} alt="" />
+                    {course.thumbnailUrl ? (
+                      <img src={course.thumbnailUrl} alt="" />
                     ) : (
                       <div className="thumb-placeholder"></div>
                     )}
@@ -33,18 +33,18 @@ const CourseTable = ({ courses, onEdit, onDelete, onTogglePublish }) => {
                   <span>{course.title}</span>
                 </div>
               </td>
-              <td>{course.category}</td>
-              <td>{Number(course.price).toLocaleString("vi-VN")}đ</td>
+              <td>{course.categoryName}</td>
+              <td>{Number(course.price || 0).toLocaleString("vi-VN")}đ</td>
               <td>{course.students}</td>
               <td>
                 <span
                   className={`status-badge ${
-                    course.status === "published"
+                    course.status === "PUBLISHED"
                       ? "status-published"
                       : "status-draft"
                   }`}
                 >
-                  {course.status === "published" ? "Đã đăng" : "Nháp"}
+                  {course.status === "PUBLISHED" ? "Đã đăng" : "Nháp"}
                 </span>
               </td>
               <td>
@@ -62,7 +62,7 @@ const CourseTable = ({ courses, onEdit, onDelete, onTogglePublish }) => {
                     className="btn-action btn-publish"
                     onClick={() => onTogglePublish(course)}
                   >
-                    {course.status === "published" ? "Ẩn" : "Đăng"}
+                    {course.status === "PUBLISHED" ? "Ẩn" : "Đăng"}
                   </button>
 
                   <button

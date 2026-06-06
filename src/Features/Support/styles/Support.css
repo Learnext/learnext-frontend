@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap");
 .support-page {
   min-height: 100vh;
   background: #fce3fe;
@@ -97,6 +98,12 @@
   border-color: #ff4141;
 }
 
+.form-group input:disabled {
+  background-color: #f5f5f5;
+  color: #888;
+  cursor: not-allowed;
+}
+
 .btn-submit {
   width: 100%;
   height: 60px;
@@ -186,7 +193,6 @@
   gap: 20px;
 }
 
-.ticket-history,
 .faq-section {
   background: white;
   border-radius: 12px;
@@ -194,7 +200,6 @@
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 }
 
-.ticket-history h3,
 .faq-section h3 {
   font-size: 16px;
   font-weight: 600;
@@ -202,74 +207,6 @@
   margin: 0 0 16px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-}
-
-.no-tickets {
-  font-size: 14px;
-  color: #aaa;
-}
-
-.ticket-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.ticket-item {
-  padding: 14px;
-  border: 1px solid #ebebeb;
-  border-radius: 8px;
-  transition: border 0.2s;
-  cursor: pointer;
-}
-
-.ticket-item:hover {
-  border-color: #ff4141;
-}
-
-.ticket-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 6px;
-}
-
-.ticket-id {
-  font-size: 13px;
-  font-weight: 700;
-  color: #ff4141;
-}
-
-.ticket-status {
-  font-size: 12px;
-  font-weight: 500;
-  padding: 3px 12px;
-  border-radius: 75px;
-}
-
-.status-pending {
-  background: #fff3e0;
-  color: #e65100;
-}
-.status-resolved {
-  background: #e8f5e9;
-  color: #2e7d32;
-}
-.status-closed {
-  background: #f3f3f3;
-  color: #888;
-}
-
-.ticket-subject {
-  font-size: 14px;
-  font-weight: 500;
-  color: #374151;
-  margin: 0 0 6px;
-}
-
-.ticket-date {
-  font-size: 12px;
-  color: #aaa;
 }
 
 /* ===== FAQ ===== */

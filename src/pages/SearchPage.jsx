@@ -1,54 +1,102 @@
-import { useMemo } from "react";
+import React, { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { useCourses } from "../Features/discovery/hooks/useCourses";
 import "./CSS/SearchPage.css";
+
+const API = "http://localhost:1201/api/v1";
 
 const SearchPage = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const keyword = searchParams.get("q") || "";
 
-  const { courses, loading } = useCourses(); // ← dùng chung
+  const [results, setResults] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [pagination, setPagination] = useState(null);
 
-  const results = useMemo(() => {
-    if (!keyword.trim()) return [];
-    return courses.filter(
-      (c) =>
-        c.title?.toLowerCase().includes(keyword.toLowerCase()) ||
-        c.description?.toLowerCase().includes(keyword.toLowerCase()) ||
-        c.category?.toLowerCase().includes(keyword.toLowerCase()),
+  useEffect(() => {
+    const fetchSearchResults = async () => {
+      setLoading(true);
+      try {
+        // Sử dụng API search chuẩn của Learnext
+        const query = new URLSearchParams();
+        if (keyword.trim()) {
+          query.append("q", keyword.trim());
+        }
+        // Có thể thêm phân trang mặc định
+        query.append("page", "1");
+        query.append("pageSize", "12");
+
+        const res = await fetch(`${API}/courses/search?${query.toString()}`);
+        const json = await res.json();
+
+        if (json.success) {
+          setResults(json.data || []);
+          setPagination(json.pagination);
+        }
+      } catch (err) {
+        console.error("Lỗi tìm kiếm khóa học:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSearchResults();
+  }, [keyword]); // Chạy lại API mỗi khi keyword trên URL thay đổi
+
+  if (loading) {
+    return (
+      <div className="search-page">
+        <p>Đang tải kết quả tìm kiếm...</p>
+      </div>
     );
-  }, [courses, keyword]);
-
-  if (loading) return <p>Đang tải...</p>;
+  }
 
   return (
     <div className="search-page">
       <h1 className="search-title">Kết quả tìm kiếm: "{keyword}"</h1>
-      <p className="search-count">Tìm thấy {results.length} khóa học</p>
+      <p className="search-count">
+        Tìm thấy {pagination?.totalItems ?? results.length} khóa học
+      </p>
 
-      <div className="search-grid">
-        {results.map((course) => (
-          <div
-            key={course.id}
-            className="search-card"
-            onClick={() => navigate(`/course/${course.id}`)}
-          >
-            <img src={course.thumbnail} alt={course.title} />
-            <div className="search-body">
-              <div className="search-category">{course.category}</div>
-              <div className="search-name">{course.title}</div>
-              <div className="search-desc">{course.description}</div>
-              <div className="search-price">
-                {Number(course.price || 0).toLocaleString("vi-VN")}đ
+      {results.length === 0 ? (
+        <div className="search-empty">Không tìm thấy khóa học phù hợp</div>
+      ) : (
+        <div className="search-grid">
+          {results.map((course) => (
+            <div
+              key={course.id}
+              className="search-card"
+              onClick={() => navigate(`/course/${course.id}`)}
+            >
+              <img
+                src={course.thumbnailUrl}
+                alt={course.title}
+                referrerPolicy="no-referrer"
+                onError={(e) => {
+                  e.target.src =
+                    "https://placehold.co/400x225/4f46e5/white?text=No+Image";
+                }}
+              />
+              <div className="search-body">
+                {/* Dùng chuẩn tên field từ CourseListItemResponse DTO */}
+                <div className="search-category">{course.categoryName}</div>
+                <div className="search-name">{course.title}</div>
+
+                {/* Thêm tên giảng viên vì API có trả về */}
+                <div
+                  className="search-instructor"
+                  style={{ fontSize: "0.9rem", color: "#666" }}
+                >
+                  Giảng viên: {course.instructorName}
+                </div>
+
+                <div className="search-price">
+                  {Number(course.price || 0).toLocaleString("vi-VN")}đ
+                </div>
               </div>
             </div>
-          </div>
-        ))}
-      </div>
-
-      {results.length === 0 && (
-        <div className="search-empty">Không tìm thấy khóa học phù hợp</div>
+          ))}
+        </div>
       )}
     </div>
   );

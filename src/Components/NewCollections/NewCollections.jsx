@@ -9,10 +9,9 @@ const NewCollections = () => {
   useEffect(() => {
     const load = async () => {
       try {
-        const data = await fetchDiscoveryCourses();
+        const courses = await fetchDiscoveryCourses();
 
-        // lấy 8 khóa mới nhất
-        const latest = [...data].reverse().slice(0, 8);
+        const latest = courses.slice(0, 8);
 
         setCourses(latest);
       } catch (err) {

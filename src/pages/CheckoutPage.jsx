@@ -1,219 +1,183 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState } from "react";
+import { useNavigate, useLocation, Navigate } from "react-router-dom";
 import "./CSS/CheckoutPage.css";
 import { useAuth } from "../Features/auth/context/AuthContext";
-import {
-  fetchCartService,
-  clearCartService,
-} from "../Features/cart/services/cartService";
 
-const API = "http://localhost:5000";
+const API = "http://localhost:1201/api/v1";
 
 const CheckoutPage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  const [cartItems, setCartItems] = useState([]);
+  // Lấy dữ liệu khóa học được truyền từ trang CourseDetail
+  const { state: targetCourse } = useLocation();
 
-  const [paying, setPaying] = useState(false); // fix: tránh bấm nhiều lần
+  const [loading, setLoading] = useState(false);
+  // Lưu data order do Backend trả về
+  const [orderData, setOrderData] = useState(null);
+  const [proofFile, setProofFile] = useState(null);
 
-  // fix: dùng service thay vì đọc thẳng localStorage
-  useEffect(() => {
-    const load = async () => {
-      const data = await fetchCartService();
-      setCartItems(data);
-    };
-    load();
-  }, []);
+  // Nếu người dùng gõ trực tiếp URL /checkout mà không đi từ nút "Mua ngay", đẩy về trang chủ
+  if (!targetCourse) {
+    return <Navigate to="/" replace />;
+  }
 
-  const total = cartItems.reduce(
-    (sum, item) => sum + Number(item.price || 0),
-    0,
-  );
-  const [showQR, setShowQR] = useState(false);
-
-  const transferContent =
-    user && cartItems.length
-      ? `COURSE_${cartItems[0].courseId}_USER_${user.id}`
-      : "";
-
-  const qrUrl =
-    `https://img.vietqr.io/image/MB-123456789-compact2.png` +
-    `?amount=${total}` +
-    `&addInfo=${transferContent}` +
-    `&accountName=NGUYEN%20VAN%20A`;
-
-  const handlePayment = async () => {
-    console.log("=== BẮT ĐẦU THANH TOÁN ===");
-    console.log("User:", user);
-    console.log("Cart items:", cartItems);
-
+  // BƯỚC 1: TẠO ĐƠN HÀNG (Gọi BE lấy mã QR)
+  const handleCreateOrder = async () => {
     if (!user) {
-      console.log("Chưa đăng nhập → redirect login");
       localStorage.setItem("redirect-after-login", "/checkout");
       navigate("/login");
       return;
     }
 
-    if (cartItems.length === 0) {
-      console.log("Giỏ hàng trống");
-      alert("Giỏ hàng đang trống");
-      return;
-    }
-
-    if (paying) {
-      console.log("Đang xử lý, bỏ qua");
-      return;
-    }
-    setPaying(true);
+    setLoading(true);
+    const token = localStorage.getItem("auth-token");
 
     try {
-      const existingRes = await fetch(`${API}/orders?userId=${user.id}`);
-      const existingOrders = await existingRes.json();
-      console.log("Orders hiện tại:", existingOrders);
+      const res = await fetch(`${API}/orders`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          courseId: targetCourse.courseId, // ID của khóa học từ router state
+        }),
+      });
 
-      for (const item of cartItems) {
-        const alreadyBought = existingOrders.some(
-          (o) => String(o.courseId) === String(item.courseId),
-        );
-        console.log(`Course ${item.courseId} - đã mua:`, alreadyBought);
-
-        if (!alreadyBought) {
-          const res = await fetch(`${API}/orders`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              userId: String(user.id),
-              courseId: String(item.courseId),
-              createdAt: new Date().toISOString(),
-              paymentMethod: "cod",
-              status: "paid",
-            }),
-          });
-
-          await res.json();
-
-          // tăng học viên
-          const courseRes = await fetch(`${API}/courses/${item.courseId}`);
-
-          const course = await courseRes.json();
-
-          await fetch(`${API}/courses/${item.courseId}`, {
-            method: "PATCH",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              students: (course.students || 0) + 1,
-            }),
-          });
-        }
+      const json = await res.json();
+      if (json.success) {
+        setOrderData(json.data); // Lưu orderData (chứa qrImageUrl, paymentCode, id...)
+      } else {
+        alert(json.error?.message || "Tạo đơn hàng thất bại");
       }
-
-      clearCartService();
-      setCartItems([]);
-      console.log("=== THANH TOÁN XONG ===");
-      alert("Thanh toán thành công!");
-      navigate("/my-courses");
     } catch (err) {
-      console.error("LỖI THANH TOÁN:", err);
-      alert("Thanh toán thất bại, vui lòng thử lại");
+      console.error("LỖI TẠO ĐƠN:", err);
+      alert("Đã xảy ra lỗi khi tạo đơn hàng.");
     } finally {
-      setPaying(false);
+      setLoading(false);
+    }
+  };
+
+  // BƯỚC 2: UPLOAD MINH CHỨNG THANH TOÁN
+  const handleSubmitProof = async () => {
+    if (!proofFile) return alert("Vui lòng chọn ảnh minh chứng thanh toán!");
+
+    setLoading(true);
+    const token = localStorage.getItem("auth-token");
+
+    // Vì là file upload, dùng FormData thay vì JSON
+    const formData = new FormData();
+    formData.append("proofFile", proofFile);
+
+    try {
+      // Gọi API gửi minh chứng chuẩn theo Contract V8
+      const res = await fetch(`${API}/orders/${orderData.id}/proof`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          // Không set Content-Type, trình duyệt sẽ tự sinh boundary cho multipart/form-data
+        },
+        body: formData,
+      });
+
+      const json = await res.json();
+      if (json.success) {
+        alert(
+          "Gửi minh chứng thành công! Vui lòng chờ admin duyệt và gửi mã qua email.",
+        );
+        navigate("/my-courses");
+      } else {
+        alert(json.error?.message || "Gửi minh chứng thất bại");
+      }
+    } catch (err) {
+      console.error("LỖI UPLOAD PROOF:", err);
+      alert("Đã xảy ra lỗi khi tải ảnh lên.");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="checkout-page">
       <div className="checkout-left">
-        <h1 className="checkout-title">Thanh toán</h1>
-
-        {cartItems.length === 0 ? (
-          <p>Không có khóa học trong giỏ hàng</p>
-        ) : (
-          cartItems.map((item) => (
-            <div key={item.id} className="checkout-course">
-              <img src={item.thumbnail} alt={item.title} />
-
-              <div className="checkout-course-info">
-                <div className="checkout-course-title">{item.title}</div>
-
-                <div className="checkout-course-price">
-                  {Number(item.price || 0).toLocaleString()}đ
-                </div>
-              </div>
+        <h1 className="checkout-title">Thanh toán khóa học</h1>
+        <div className="checkout-course">
+          <img
+            src={targetCourse.thumbnailUrl}
+            alt={targetCourse.title}
+            referrerPolicy="no-referrer"
+            onError={(e) => {
+              e.target.src =
+                "https://placehold.co/400x225/4f46e5/white?text=No+Image";
+            }}
+          />
+          <div className="checkout-course-info">
+            <div className="checkout-course-title">{targetCourse.title}</div>
+            <div className="checkout-course-price">
+              {Number(targetCourse.price || 0).toLocaleString()}đ
             </div>
-          ))
-        )}
+          </div>
+        </div>
       </div>
 
       <div className="checkout-right">
-        <h2 className="summary-title">Tóm tắt đơn hàng</h2>
-
-        <div className="summary-row">
-          <span>Số khóa học</span>
-          <span>{cartItems.length}</span>
-        </div>
-
-        <div className="summary-total">
-          <span>Tổng cộng</span>
-          <span>{total.toLocaleString()}đ</span>
-        </div>
-
-        <div className="payment-title">Phương thức thanh toán</div>
-
-        <div className="payment-list">Chuyển khoản ngân hàng (QR)</div>
-
-        <button className="confirm-payment-btn" onClick={() => setShowQR(true)}>
-          Thanh toán bằng QR
-        </button>
-      </div>
-
-      {showQR && (
-        <div className="qr-modal">
+        {/* NẾU CHƯA CÓ ORDER -> HIỂN THỊ NÚT TẠO ĐƠN */}
+        {!orderData ? (
+          <>
+            <h2 className="summary-title">Tiến hành mua</h2>
+            <button
+              className="confirm-payment-btn"
+              onClick={handleCreateOrder}
+              disabled={loading}
+            >
+              {loading ? "Đang tạo đơn..." : "Tạo đơn hàng & Lấy mã QR"}
+            </button>
+          </>
+        ) : (
+          /* NẾU ĐÃ CÓ ORDER -> HIỂN THỊ QR TỪ BACKEND VÀ FORM UPLOAD PROOF */
           <div className="qr-box">
             <h3>Quét mã QR để thanh toán</h3>
-
-            <img src={qrUrl} alt="QR Payment" className="payment-qr" />
+            {/* Sử dụng link QR do Backend trả về */}
+            <img
+              src={orderData.qrImageUrl}
+              alt="QR Payment"
+              className="payment-qr"
+            />
 
             <div className="bank-info">
               <p>
-                <strong>Ngân hàng:</strong> MB Bank
+                <strong>Mã đơn hàng:</strong> {orderData.id}
               </p>
-
               <p>
-                <strong>STK:</strong> 0929600037
+                <strong>Số tiền:</strong>{" "}
+                {Number(orderData.amount).toLocaleString()}đ
               </p>
-
-              <p>
-                <strong>Chủ TK:</strong> NGUYEN KHANH NGUYEN
-              </p>
-
-              <p>
-                <strong>Số tiền:</strong> {total.toLocaleString()}đ
-              </p>
-
-              <p>
-                <strong>Nội dung:</strong> {transferContent}
+              <p style={{ color: "red", fontWeight: "bold" }}>
+                <strong>Nội dung chuyển khoản (Bắt buộc):</strong>{" "}
+                {orderData.paymentCode}
               </p>
             </div>
 
-            <button
-              className="confirm-payment-btn"
-              onClick={handlePayment}
-              disabled={paying}
-            >
-              {paying ? "Đang xử lý..." : "Tôi đã chuyển khoản"}
-            </button>
-
-            <button className="cancel-btn" onClick={() => setShowQR(false)}>
-              Đóng
-            </button>
+            <div className="proof-upload-section" style={{ marginTop: "20px" }}>
+              <h4>Tải lên minh chứng thanh toán</h4>
+              <input
+                type="file"
+                accept="image/jpeg, image/png, image/webp"
+                onChange={(e) => setProofFile(e.target.files[0])}
+              />
+              <button
+                className="confirm-payment-btn"
+                style={{ marginTop: "10px" }}
+                onClick={handleSubmitProof}
+                disabled={loading || !proofFile}
+              >
+                {loading ? "Đang tải lên..." : "Xác nhận đã chuyển khoản"}
+              </button>
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };

@@ -1,26 +1,45 @@
 import React, { useEffect, useState } from "react";
 import "./Item.css";
 import { Link } from "react-router-dom";
-import { addToCartService } from "../../Features/cart/services/cartService";
 import { useAuth } from "../../Features/auth/context/AuthContext";
 
-const API = "http://localhost:5000";
+const API = "http://localhost:1201/api/v1";
 
 const Item = (props) => {
   const { user } = useAuth();
   const [alreadyBought, setAlreadyBought] = useState(false);
 
+  // LƯU Ý VỀ HIỆU NĂNG:
+  // Việc gọi API enrollments ở từng item lẻ như thế này sẽ gây ra lỗi N+1 request.
+  // Tuy nhiên, để tránh phá vỡ cấu trúc hiện tại của bạn, tôi giữ nguyên logic check nhưng bổ sung cơ chế chống spam (caching tạm thời).
   useEffect(() => {
-    if (!user || !props.id) return;
+    const checkEnrollment = async () => {
+      if (!user || !props.id) return;
 
-    const check = async () => {
       try {
-        const res = await fetch(`${API}/orders`);
-        const data = await res.json();
-        const bought = data.some(
-          (o) =>
-            String(o.userId) === String(user.id) &&
-            String(o.courseId) === String(props.id),
+        const token = localStorage.getItem("auth-token");
+
+        // Tối ưu nhẹ: Thử kiểm tra xem có enrollments lưu tạm trong sessionStorage không để tránh gọi API nhiều lần
+        const cached = sessionStorage.getItem("user-enrollments");
+        let enrollments = [];
+
+        if (cached) {
+          enrollments = JSON.parse(cached);
+        } else {
+          const res = await fetch(`${API}/learning/enrollments`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          const result = await res.json();
+          enrollments = result.data || [];
+          // Lưu tạm vào session để các Item khác không phải gọi lại API
+          sessionStorage.setItem(
+            "user-enrollments",
+            JSON.stringify(enrollments),
+          );
+        }
+
+        const bought = enrollments.some(
+          (e) => String(e.courseId) === String(props.id),
         );
         setAlreadyBought(bought);
       } catch (err) {
@@ -28,27 +47,8 @@ const Item = (props) => {
       }
     };
 
-    check();
+    checkEnrollment();
   }, [user, props.id]);
-
-  const handleAddCart = async (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    if (alreadyBought) {
-      alert("Bạn đã mua khóa học này rồi!");
-      return;
-    }
-
-    try {
-      const res = await addToCartService(props);
-      alert(res.message || "Đã thêm vào giỏ hàng");
-      window.dispatchEvent(new Event("cartUpdated"));
-    } catch (err) {
-      console.error(err);
-      alert("Lỗi thêm giỏ hàng");
-    }
-  };
 
   return (
     <Link to={`/course/${props.id}`} className="item-link">
@@ -56,8 +56,10 @@ const Item = (props) => {
         <div className="item-image-wrapper">
           <img
             className="item-image"
-            src={props.thumbnail}
+            // Hỗ trợ cả 2 kiểu tên props để tương thích ngược với code cũ
+            src={props.thumbnailUrl || props.thumbnail}
             alt={props.title}
+            referrerPolicy="no-referrer"
             onError={(e) => {
               e.target.src =
                 "https://placehold.co/400x225/4f46e5/white?text=No+Image";
@@ -68,20 +70,24 @@ const Item = (props) => {
 
         <div className="item-content">
           <p className="item-title">{props.title}</p>
+
+          {/* Bổ sung hiển thị thông tin Giảng viên & Danh mục nếu cha có truyền vào */}
+          {(props.instructorName || props.category || props.categoryName) && (
+            <div
+              className="item-meta"
+              style={{ fontSize: "0.8rem", color: "#666", marginBottom: "8px" }}
+            >
+              <span>{props.categoryName || props.category}</span>
+              {props.instructorName && <span> • {props.instructorName}</span>}
+            </div>
+          )}
+
           <div className="item-price">
             <div className="item-price-new">
-              {Number(props.price).toLocaleString()}đ
+              {Number(props.price || 0).toLocaleString("vi-VN")}đ
             </div>
           </div>
         </div>
-
-        <button
-          className="add-cart-btn"
-          onClick={handleAddCart}
-          title={alreadyBought ? "Đã mua" : "Thêm vào giỏ"}
-        >
-          {alreadyBought ? "✓" : "🛒"}
-        </button>
       </div>
     </Link>
   );

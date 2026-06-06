@@ -1,107 +1,82 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import "../pages/CSS/CourseDetail.css";
-import { addToCartService } from "../Features/cart/services/cartService";
 import { useAuth } from "../Features/auth/context/AuthContext";
 
-const API = "http://localhost:5000";
+const API = "http://localhost:1201/api/v1";
 
 const CourseDetail = () => {
   const { id } = useParams();
   const { user } = useAuth();
-  const [course, setCourse] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [alreadyBought, setAlreadyBought] = useState(false);
-  const [inCart, setInCart] = useState(false);
 
+  const [course, setCourse] = useState(null);
+  const [isEnrolled, setIsEnrolled] = useState(false);
   const navigate = useNavigate();
 
-  // Load course
+  // 1. Tải chi tiết khóa học
   useEffect(() => {
     const loadCourse = async () => {
       try {
         const res = await fetch(`${API}/courses/${id}`);
-        const data = await res.json();
-        setCourse(data);
+        const json = await res.json();
+        if (json.success) {
+          setCourse(json.data);
+        }
       } catch (err) {
-        console.error(err);
+        console.error("Lỗi tải chi tiết khóa học:", err);
       }
     };
     loadCourse();
   }, [id]);
 
-  // Kiểm tra đã mua chưa
+  // 2. Kiểm tra quyền truy cập (Enrollment)
   useEffect(() => {
     if (!user || !id) return;
-    const checkBought = async () => {
+    const checkEnrollment = async () => {
       try {
-        const res = await fetch(
-          `${API}/orders?userId=${user.id}&courseId=${id}`,
+        const token = localStorage.getItem("auth-token");
+        const res = await fetch(`${API}/learning/enrollments`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const json = await res.json();
+
+        const enrollments = json.data || [];
+        setIsEnrolled(
+          enrollments.some((e) => String(e.courseId) === String(id)),
         );
-        const data = await res.json();
-        setAlreadyBought(data.length > 0);
       } catch (err) {
-        console.error(err);
+        console.error("Lỗi kiểm tra quyền học:", err);
       }
     };
-    checkBought();
+    checkEnrollment();
   }, [user, id]);
 
-  // Kiểm tra đã có trong giỏ chưa
-  useEffect(() => {
-    const cart = JSON.parse(localStorage.getItem("guest-cart")) || [];
-    setInCart(cart.some((item) => String(item.courseId) === String(id)));
-  }, [id]);
-
-  const addToCart = async () => {
-    if (alreadyBought) {
-      alert("Bạn đã mua khóa học này rồi!");
+  // 3. Xử lý "Mua ngay"
+  const handleBuyNow = () => {
+    if (!user) {
+      localStorage.setItem("redirect-after-login", `/course/${id}`);
+      navigate("/login");
       return;
     }
 
-    setLoading(true);
-    try {
-      const data = await addToCartService(course);
-
-      if (data.success) {
-        setInCart(true);
-      }
-
-      window.dispatchEvent(new Event("cartUpdated"));
-      alert(data.message || "Đã thêm vào giỏ hàng");
-    } catch (err) {
-      console.error(err);
-      alert("Lỗi thêm giỏ hàng");
-    } finally {
-      setLoading(false);
-    }
+    // Chuyển sang trang Checkout, truyền data khóa học qua Router State
+    navigate("/checkout", {
+      state: {
+        courseId: course.id,
+        title: course.title,
+        price: course.price,
+        thumbnailUrl: course.thumbnailUrl,
+      },
+    });
   };
 
-  const buyNow = async () => {
-    setLoading(true);
-    try {
-      if (!inCart) {
-        await addToCartService(course);
-        window.dispatchEvent(new Event("cartUpdated"));
-      }
-      navigate("/checkout");
-    } catch (err) {
-      console.error(err);
-      alert("Lỗi, vui lòng thử lại");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (!course) {
-    return <h2>Đang tải...</h2>;
-  }
+  if (!course) return <h2>Đang tải chi tiết khóa học...</h2>;
 
   return (
     <div className="course-detail">
       <div className="course-detail-left">
         <img
-          src={course.thumbnail}
+          src={course.thumbnailUrl}
           alt={course.title}
           referrerPolicy="no-referrer"
           onError={(e) => {
@@ -114,43 +89,35 @@ const CourseDetail = () => {
       <div className="course-detail-right">
         <h1 className="course-detail-title">{course.title}</h1>
         <p className="course-detail-desc">{course.description}</p>
+
         <div className="course-detail-price">
           {Number(course.price || 0).toLocaleString()}đ
         </div>
 
-        {alreadyBought ? (
-          <button className="course-detail-btn" disabled>
-            Đã mua
-          </button>
-        ) : inCart ? (
+        {/* Nút hành động thay đổi dựa trên trạng thái Enrollment */}
+        {isEnrolled ? (
           <button
             className="course-detail-btn"
-            onClick={() => navigate("/cart")}
+            /* ĐÃ SỬA: Dùng đúng đường dẫn trong App.js */
+            onClick={() => navigate(`/course/${course.id}/learn`)}
           >
-            Xem giỏ hàng
+            Đã sở hữu - Vào học ngay
           </button>
         ) : (
-          <button
-            className="course-detail-btn"
-            onClick={addToCart}
-            disabled={loading}
-          >
-            {loading ? "Đang thêm..." : "Thêm vào giỏ hàng"}
-          </button>
-        )}
-
-        {!alreadyBought && (
-          <button className="buy-now-btn" onClick={buyNow} disabled={loading}>
+          <button className="buy-now-btn" onClick={handleBuyNow}>
             Mua ngay
           </button>
         )}
 
-        <button
-          className="learn-btn"
-          onClick={() => navigate(`/course/${course.id}/learn?preview=true`)}
-        >
-          Học thử miễn phí
-        </button>
+        {/* ĐÃ SỬA: Chỉ hiện nút Học thử nếu backend báo hasPreview === true */}
+        {!isEnrolled && course.hasPreview && (
+          <button
+            className="learn-btn"
+            onClick={() => navigate(`/course/${course.id}/learn?preview=true`)}
+          >
+            Học thử miễn phí
+          </button>
+        )}
       </div>
     </div>
   );

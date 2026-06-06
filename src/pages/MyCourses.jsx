@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../Features/auth/context/AuthContext";
 import "./CSS/MyCourses.css";
 
-const API = "http://localhost:5000";
+const API = "http://localhost:1201/api/v1";
 
 const MyCourses = () => {
   const { user } = useAuth();
@@ -19,71 +19,16 @@ const MyCourses = () => {
 
     const loadMyCourses = async () => {
       try {
-        // Fetch all, filter thủ công để tránh type mismatch
-        const [ordersRes, coursesRes, progressRes, lessonsRes] =
-          await Promise.all([
-            fetch(`${API}/orders`),
-            fetch(`${API}/courses`),
-            fetch(`${API}/progress`),
-            fetch(`${API}/lessons`),
-          ]);
+        const token = localStorage.getItem("auth-token");
 
-        const allOrders = await ordersRes.json();
-        const allCourses = await coursesRes.json();
-        const allProgress = await progressRes.json();
-        const allLessons = await lessonsRes.json();
+        const res = await fetch(`${API}/learning/enrollments`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
-        // Filter orders theo user, so sánh string để tránh "1" !== 1
-        const userOrders = allOrders.filter(
-          (o) => String(o.userId) === String(user.id),
-        );
-
-        // Dedup theo courseId
-        const uniqueOrders = userOrders.filter(
-          (order, index, self) =>
-            index ===
-            self.findIndex(
-              (o) => String(o.courseId) === String(order.courseId),
-            ),
-        );
-
-        const userProgress = allProgress.filter(
-          (p) => String(p.userId) === String(user.id),
-        );
-
-        const myCourses = uniqueOrders
-          .map((order) => {
-            const course = allCourses.find(
-              (c) => String(c.id) === String(order.courseId),
-            );
-
-            if (!course) return null;
-
-            const courseLessons = allLessons.filter(
-              (l) => String(l.courseId) === String(order.courseId),
-            );
-
-            const completedCount = userProgress.filter(
-              (p) =>
-                String(p.courseId) === String(order.courseId) && p.completed,
-            ).length;
-
-            const percent =
-              courseLessons.length > 0
-                ? Math.round((completedCount / courseLessons.length) * 100)
-                : 0;
-
-            return {
-              ...course,
-              orderId: order.id,
-              progress: percent,
-              completed: completedCount,
-              totalLessons: courseLessons.length,
-            };
-          })
-          .filter(Boolean);
-
-        setCourses(myCourses);
+        const json = await res.json();
+        if (json.success) {
+          setCourses(json.data || []);
+        }
       } catch (err) {
         console.error("LỖI loadMyCourses:", err);
       } finally {
@@ -135,52 +80,60 @@ const MyCourses = () => {
       ) : (
         <div className="my-courses-grid">
           {courses.map((course) => (
-            <div className="my-course-card" key={course.orderId || course.id}>
+            // BE trả về courseId làm định danh khóa học
+            <div className="my-course-card" key={course.courseId}>
               <div className="my-course-thumbnail">
                 <img
-                  src={course.thumbnail}
-                  alt={course.title}
+                  src={course.thumbnailUrl}
+                  alt={course.courseTitle}
                   referrerPolicy="no-referrer"
                   onError={(e) => {
                     e.target.src =
                       "https://placehold.co/400x225/4f46e5/white?text=No+Image";
                   }}
                 />
-                {course.progress === 100 && (
+                {course.progressPercent === 100 && (
                   <div className="completed-badge">✓ Hoàn thành</div>
                 )}
               </div>
 
               <div className="my-course-body">
-                <h3>{course.title}</h3>
+                {/* Dùng courseTitle thay vì title */}
+                <h3>{course.courseTitle}</h3>
 
-                <div className="lesson-count">
-                  <span>📖</span>
-                  <span>
-                    {course.completed}/{course.totalLessons} bài học
-                  </span>
-                </div>
+                {/* Kiểm tra totalLessons để hiển thị thanh tiến trình */}
+                {course.totalLessons > 0 && (
+                  <>
+                    <div className="lesson-count">
+                      <span>📖</span>
+                      <span>
+                        {course.completedLessons ?? 0}/{course.totalLessons} bài
+                        học
+                      </span>
+                    </div>
 
-                <div className="progress-bar">
-                  <div
-                    className="progress-fill"
-                    style={{ width: `${course.progress}%` }}
-                  />
-                </div>
+                    <div className="progress-bar">
+                      <div
+                        className="progress-fill"
+                        style={{ width: `${course.progressPercent ?? 0}%` }}
+                      />
+                    </div>
 
-                <div className="progress-footer">
-                  <span className="progress-text">
-                    {course.progress}% hoàn thành
-                  </span>
-                </div>
+                    <div className="progress-footer">
+                      <span className="progress-text">
+                        {course.progressPercent ?? 0}% hoàn thành
+                      </span>
+                    </div>
+                  </>
+                )}
 
                 <button
                   className="continue-btn"
-                  onClick={() => navigate(`/course/${course.id}/learn`)}
+                  onClick={() => navigate(`/course/${course.courseId}/learn`)}
                 >
-                  {course.progress === 0
+                  {!course.progressPercent || course.progressPercent === 0
                     ? "Bắt đầu học"
-                    : course.progress === 100
+                    : course.progressPercent === 100
                       ? "Xem lại"
                       : "Tiếp tục học"}
                 </button>
