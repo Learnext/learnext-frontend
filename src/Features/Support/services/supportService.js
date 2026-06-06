@@ -14,13 +14,15 @@ const unwrap = (payload) => {
 
 export const createSupportLead = async (data) => {
   // Chuẩn bị payload chuẩn gửi cho BE
+
   const requestBody = {
-    fullName: data.fullName,
+    name: data.fullName, // Tên cột trong ERD là 'name'
     email: data.email,
     category: data.category,
     subject: data.subject,
-    content: data.content,
+    message: data.content, // Tên cột trong ERD là 'message'
   };
+  // ... phần còn lại giữ nguyên
 
   const headers = {
     "Content-Type": "application/json",

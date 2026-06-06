@@ -29,10 +29,10 @@ export const fetchProfile = async () => {
 export const updateProfile = async (formData, authUser) => {
   // Chuẩn bị payload gửi lên BE (Đã thêm expertise và bỏ username)
   const requestBody = {
-    fullName: formData.fullName || authUser?.fullName || "",
-    phone: formData.phone || "",
-    bio: formData.bio || "",
-    expertise: formData.expertise || "", // Quan trọng: Đã bổ sung trường này!
+    full_name: formData.fullName, // ERD dùng full_name (snake_case)
+    phone: formData.phone,
+    bio: formData.bio,
+    expertise: formData.expertise,
   };
 
   if (!API_URL) {
