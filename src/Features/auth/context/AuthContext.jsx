@@ -18,10 +18,15 @@ export const AuthProvider = ({ children }) => {
   });
 
   const login = (token, userData) => {
-    localStorage.setItem("auth-token", token);
-    localStorage.setItem("user", JSON.stringify(userData));
+    const normalizedUser = {
+      ...userData,
+      isInstructor:
+        userData.role === "instructor" || userData.role === "INSTRUCTOR",
+    };
 
-    setUser(userData);
+    localStorage.setItem("auth-token", token);
+    localStorage.setItem("user", JSON.stringify(normalizedUser));
+    setUser(normalizedUser);
   };
 
   const logout = async () => {

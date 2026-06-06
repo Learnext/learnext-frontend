@@ -1,3 +1,4 @@
+import { INSTRUCTORS } from "../../../config/instructors";
 const rawApiUrl = import.meta.env.VITE_API_URL;
 
 const API_URL = rawApiUrl
@@ -15,10 +16,14 @@ export const authHeaders = (isJson = false) => {
 };
 
 export const instructorHeaders = (isJson = false) => {
-  const instructorId = localStorage.getItem("instructorId");
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const instructorId =
+    INSTRUCTORS[user.email] || localStorage.getItem("instructorId") || "";
+
+  console.log("Email:", user.email, "→ X-Instructor-Id:", instructorId);
 
   return {
-    "X-Instructor-Id": instructorId || "",
+    "X-Instructor-Id": instructorId,
     ...(isJson && { "Content-Type": "application/json" }),
   };
 };
@@ -156,14 +161,22 @@ export const createOrderService = async (courseId) => {
   return { success: true, order };
 };
 
-export const submitPaymentProofService = async (orderId, paymentProofUrl) => {
-  const order = await fetchApi(`${API_URL}/orders/${orderId}/proof`, {
+// Sai — BE nhận multipart/form-data
+export const submitPaymentProofService = async (orderId, proofFile) => {
+  const token = localStorage.getItem("auth-token");
+  const formData = new FormData();
+  formData.append("proofFile", proofFile);
+
+  const res = await fetch(`${API_URL}/orders/${orderId}/proof`, {
     method: "POST",
-    headers: authHeaders(true),
-    body: JSON.stringify({ paymentProofUrl }),
+    headers: { Authorization: `Bearer ${token}` },
+    // KHÔNG set Content-Type — browser tự set boundary
+    body: formData,
   });
 
-  return { success: true, order };
+  const json = await res.json();
+  if (!res.ok) throw new Error(json?.error?.message || "Upload failed");
+  return { success: true, order: json.data };
 };
 
 //
@@ -259,7 +272,7 @@ export const activateCourseService = async (activationCode) => {
   const data = await fetchApi(`${API_URL}/activations/activate`, {
     method: "POST",
     headers: authHeaders(true),
-    body: JSON.stringify({ activationCode }),
+    body: JSON.stringify({ code: activationCode }),
   });
 
   return { success: true, ...data };
