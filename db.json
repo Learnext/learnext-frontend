@@ -9,132 +9,480 @@
       "isInstructor": true
     },
     {
-      "username": "Nguyen Van Aa",
-      "email": "tanngu@gmail.com",
-      "password": "1",
+      "id": "2",
+      "username": "student",
+      "email": "student@gmail.com",
+      "password": "123",
       "role": "user",
-      "id": "i9JBjhPsb2U"
+      "isInstructor": false
     },
     {
-      "username": "khanhnguyen",
+      "username": "teacher1",
       "email": "khanhnguyen2709kn@gmail.com",
-      "password": "1",
+      "password": "123",
+      "role": "instructor",
+      "isInstructor": true,
+      "id": "8dvXGYX"
+    },
+    {
+      "username": "n23dccn109@student.ptithcm.edu.vn",
+      "email": "tanngu@gmail.com",
+      "password": "123",
       "role": "user",
-      "id": "pp_wdJOC338",
-      "isInstructor": false,
-      "phone": "",
-      "bio": "",
-      "expertise": ""
+      "id": "BvL7V8X"
+    }
+  ],
+  "categories": [
+    {
+      "id": "1",
+      "name": "Lập trình"
+    },
+    {
+      "id": "2",
+      "name": "Thiết kế"
+    },
+    {
+      "id": "3",
+      "name": "Marketing"
+    },
+    {
+      "id": "4",
+      "name": "Kinh doanh"
     }
   ],
   "courses": [
     {
-      "title": "React cơ bản",
-      "description": "Khóa học React",
-      "price": 2990001,
-      "category": "Lập trình",
-      "tags": "react,javascript",
-      "thumbnail": null,
-      "intro_video": null,
-      "id": "1"
-    },
-    {
-      "title": "react",
-      "description": "",
-      "price": 2444444,
-      "category": "Lập trình",
-      "tags": "nodejs,backend",
-      "thumbnail": "blob:http://localhost:5173/c07f950d-5579-4f72-8a48-2a89eab7f559",
-      "intro_video": "John_The_Ripper_Password_Crack.mp4",
-      "status": "draft",
-      "students": 0,
-      "created_at": "2026-05-14",
-      "id": "pPa67RXg1Uo"
-    },
-    {
-      "title": "1",
-      "description": "1",
-      "price": 1,
-      "category": "Lập trình",
-      "tags": "1",
-      "thumbnail": "blob:http://localhost:5173/b96d6af7-0d22-470a-bbe6-81044a82bbe9",
-      "intro_video": null,
-      "status": "draft",
-      "students": 0,
-      "created_at": "2026-05-14",
-      "id": "FIf76uxgTLs"
-    },
-    {
-      "title": "1",
-      "description": "1",
-      "price": 1,
-      "category": "Thiết kế",
-      "tags": "1",
-      "thumbnail": "blob:http://localhost:5173/56d085e5-4789-42c9-afcc-3491f39e54f2",
-      "intro_video": null,
-      "status": "draft",
-      "students": 0,
-      "created_at": "2026-05-14",
-      "id": "4_oVnZsQOUg"
-    },
-    {
-      "title": "1",
-      "description": "1",
-      "price": 1,
-      "category": "Thiết kế",
-      "tags": "1",
-      "thumbnail": null,
-      "intro_video": null,
-      "status": "draft",
-      "students": 0,
-      "created_at": "2026-05-14",
-      "id": "zFzi2X1_k6A"
-    },
-    {
-      "title": "NguyenNgu",
-      "description": "",
-      "price": 299999,
-      "category": "Lập trình",
-      "tags": "an cut",
-      "thumbnail": "blob:http://localhost:8081/f993680c-6647-4cf4-9b5e-1507cf2b3d2b",
-      "intro_video": "YTDown.com_YouTube_GOJO-VS-SUKUNA-FULL-FIGHT-AMV-TRA-CHO-AN_Media_-bSLs4m1d_4_001_1080p.mp4",
-      "status": "draft",
-      "students": 0,
-      "created_at": "2026-05-21",
-      "id": "esavLgFRZCQ"
-    }
-  ],
-  "content": [
-    {
       "id": "1",
-      "title": "Chương 1",
-      "order": 1,
-      "sections": []
+      "instructorId": "1",
+      "title": "React JS Từ Cơ Bản Đến Nâng Cao",
+      "description": "Khóa học ReactJS thực chiến dành cho frontend developer.",
+      "price": 2990000,
+      "category": "Lập trình",
+      "tags": "react,javascript,frontend",
+      "thumbnail": "https://img-c.udemycdn.com/course/750x422/1362070_b9a1_2.jpg",
+      "intro_video": "",
+      "status": "draft",
+      "students": 122,
+      "created_at": "2026-05-14"
+    },
+    {
+      "id": "2",
+      "instructorId": "1",
+      "title": "NodeJS Backend API",
+      "description": "Xây dựng RESTful API với NodeJS Express MongoDB.",
+      "price": 1990000,
+      "category": "Lập trình",
+      "tags": "nodejs,backend,express",
+      "thumbnail": "https://img-c.udemycdn.com/course/750x422/1879018_95b6_3.jpg",
+      "intro_video": "",
+      "status": "published",
+      "students": 91,
+      "created_at": "2026-05-14"
+    },
+    {
+      "id": "3",
+      "instructorId": "1",
+      "title": "UI UX Design Chuyên Nghiệp",
+      "description": "Thiết kế giao diện hiện đại bằng Figma.",
+      "price": 1590000,
+      "category": "Thiết kế",
+      "tags": "figma,uiux",
+      "thumbnail": "https://img-c.udemycdn.com/course/750x422/3133476_929c_2.jpg",
+      "intro_video": "",
+      "status": "published",
+      "students": 70,
+      "created_at": "2026-05-14"
+    },
+    {
+      "id": "4",
+      "instructorId": "1",
+      "title": "Photoshop Masterclass",
+      "description": "Làm chủ Photoshop từ cơ bản đến nâng cao.",
+      "price": 990000,
+      "category": "Thiết kế",
+      "tags": "photoshop,design",
+      "thumbnail": "https://img-c.udemycdn.com/course/750x422/1643044_e281_5.jpg",
+      "intro_video": "",
+      "status": "published",
+      "students": 45,
+      "created_at": "2026-05-14"
+    },
+    {
+      "title": "duynhat",
+      "description": "",
+      "price": 300000,
+      "category": "Lập trình",
+      "instructorId": "1",
+      "tags": "nodejs,backend",
+      "thumbnail": "blob:http://localhost:5173/614a554a-8e56-406f-b73a-feba7cb16e54",
+      "status": "published",
+      "students": 0,
+      "created_at": "2026-06-05",
+      "id": "NartWvT"
+    },
+    {
+      "title": "ra",
+      "description": "1",
+      "price": 255000,
+      "category": "Lập trình",
+      "instructorId": "1",
+      "tags": "nodejs,backend",
+      "thumbnail": "https://file.unica.vn/storage/db240c65c57e0a4f35edba3312c62511cbac63cc/youtube-anh-livestream.png",
+      "status": "published",
+      "students": 1,
+      "created_at": "2026-06-05",
+      "id": "AKF4_q5"
     }
   ],
   "chapters": [
     {
       "id": "1",
-      "title": "Chương 1",
+      "courseId": "1",
+      "title": "React Cơ Bản",
+      "order": 1
+    },
+    {
+      "id": "2",
+      "courseId": "1",
+      "title": "React Hooks",
+      "order": 2
+    },
+    {
+      "id": "3",
+      "courseId": "2",
+      "title": "NodeJS Fundamentals",
+      "order": 1
+    },
+    {
+      "courseId": "ylJ2q0XmdAY",
+      "title": "chương 1",
       "order": 1,
-      "sections": []
+      "id": "n3bhI_LlKbo"
+    },
+    {
+      "courseId": "xS9r-1m",
+      "title": "chuong 1",
+      "order": 1,
+      "id": "yN1thLH"
+    },
+    {
+      "courseId": "3",
+      "title": "1",
+      "order": 1,
+      "id": "cmi-OfZ"
+    },
+    {
+      "courseId": "NartWvT",
+      "title": "1",
+      "order": 1,
+      "id": "LYILWFe"
     }
   ],
   "sections": [
     {
       "id": "1",
-      "title": "Phần 1",
+      "courseId": "1",
+      "chapterId": "1",
+      "title": "Giới thiệu React",
+      "order": 1
+    },
+    {
+      "id": "2",
+      "courseId": "1",
+      "chapterId": "1",
+      "title": "JSX và Components",
+      "order": 2
+    },
+    {
+      "id": "3",
+      "courseId": "1",
+      "chapterId": "2",
+      "title": "useState và useEffect",
+      "order": 1
+    },
+    {
+      "id": "4",
+      "courseId": "2",
+      "chapterId": "3",
+      "title": "ExpressJS",
+      "order": 1
+    },
+    {
+      "courseId": "ylJ2q0XmdAY",
+      "chapterId": "n3bhI_LlKbo",
+      "title": "phần 1",
       "order": 1,
-      "lessons": []
+      "id": "9K8tQrAnxTM"
+    },
+    {
+      "courseId": "ylJ2q0XmdAY",
+      "chapterId": "n3bhI_LlKbo",
+      "title": "phan 2",
+      "order": 1,
+      "id": "awDueIyDRo8"
+    },
+    {
+      "courseId": "xS9r-1m",
+      "chapterId": "yN1thLH",
+      "title": "1",
+      "order": 1,
+      "id": "maMZ5DO"
+    },
+    {
+      "courseId": "3",
+      "chapterId": "cmi-OfZ",
+      "title": "1",
+      "order": 1,
+      "id": "DHTvrIZ"
+    },
+    {
+      "courseId": "NartWvT",
+      "chapterId": "LYILWFe",
+      "title": "1",
+      "order": 1,
+      "id": "fVZLndK"
     }
   ],
   "lessons": [
     {
       "id": "1",
-      "title": "Bài 1",
+      "courseId": "1",
+      "sectionId": "1",
+      "title": "React là gì?",
       "type": "video",
-      "file": "intro.mp4"
+      "file": "react-intro.mp4",
+      "duration": "10:00"
+    },
+    {
+      "id": "2",
+      "courseId": "1",
+      "sectionId": "2",
+      "title": "Tạo Component",
+      "type": "video",
+      "file": "component.mp4",
+      "duration": "15:00"
+    },
+    {
+      "id": "4",
+      "courseId": "2",
+      "sectionId": "4",
+      "title": "Tạo REST API",
+      "type": "video",
+      "file": "",
+      "duration": "20:00"
+    },
+    {
+      "courseId": "ylJ2q0XmdAY",
+      "sectionId": "9K8tQrAnxTM",
+      "title": "aa",
+      "type": "video",
+      "file": "https://samplelib.com/lib/preview/mp4/sample-5s.mp4",
+      "duration": "10:00",
+      "id": "b3Zw8UoG36o"
+    },
+    {
+      "courseId": "ylJ2q0XmdAY",
+      "sectionId": "9K8tQrAnxTM",
+      "title": "aaa",
+      "type": "video",
+      "file": "4970802059104.mp4",
+      "duration": "10:00",
+      "id": "LvUljs52gLc"
+    },
+    {
+      "courseId": "ylJ2q0XmdAY",
+      "sectionId": "awDueIyDRo8",
+      "title": "1",
+      "type": "pdf",
+      "file": "/pdf/ngu_phap_co_ban.pdf",
+      "duration": "10:00",
+      "id": "TKklZ5pgrF0"
+    },
+    {
+      "courseId": "ylJ2q0XmdAY",
+      "sectionId": "awDueIyDRo8",
+      "title": "csdl",
+      "type": "video",
+      "file": "demo.mov",
+      "duration": "10:00",
+      "id": "l4h18O3"
+    },
+    {
+      "courseId": "xS9r-1m",
+      "sectionId": "maMZ5DO",
+      "title": "a",
+      "type": "video",
+      "file": "2026-06-02 15-50-50.mp4",
+      "duration": "10:00",
+      "id": "BZ8E2U6"
+    },
+    {
+      "courseId": "NartWvT",
+      "sectionId": "fVZLndK",
+      "title": "1",
+      "type": "video",
+      "file": "2026-06-03 17-20-22.mp4",
+      "duration": "10:00",
+      "id": "tWEsQRk"
     }
   ],
+  "cart": [],
+  "orders": [
+    {
+      "userId": "2",
+      "courseId": "3",
+      "createdAt": "2026-06-01T03:45:25.402Z",
+      "paymentMethod": "cod",
+      "status": "paid",
+      "id": "YoqvgF1a-9I"
+    },
+    {
+      "userId": "2",
+      "courseId": "4",
+      "createdAt": "2026-06-01T03:48:18.523Z",
+      "paymentMethod": "cod",
+      "status": "paid",
+      "id": "bkwrSY9rZd8"
+    },
+    {
+      "userId": "2",
+      "courseId": "1",
+      "createdAt": "2026-06-01T03:53:17.871Z",
+      "paymentMethod": "cod",
+      "status": "paid",
+      "id": "OQKfpH4"
+    },
+    {
+      "userId": "1",
+      "courseId": "1",
+      "createdAt": "2026-06-05T04:00:44.676Z",
+      "paymentMethod": "cod",
+      "status": "paid",
+      "id": "0Bly3s1"
+    },
+    {
+      "userId": "1",
+      "courseId": "ylJ2q0XmdAY",
+      "createdAt": "2026-06-05T04:01:35.051Z",
+      "paymentMethod": "cod",
+      "status": "paid",
+      "id": "a4iVf7M"
+    },
+    {
+      "userId": "2",
+      "courseId": "ylJ2q0XmdAY",
+      "createdAt": "2026-06-05T07:06:05.983Z",
+      "paymentMethod": "cod",
+      "status": "paid",
+      "id": "l-eJZLT"
+    },
+    {
+      "userId": "BvL7V8X",
+      "courseId": "NartWvT",
+      "createdAt": "2026-06-05T07:19:53.780Z",
+      "paymentMethod": "cod",
+      "status": "paid",
+      "id": "zeu_kHy"
+    },
+    {
+      "userId": "BvL7V8X",
+      "courseId": "1",
+      "createdAt": "2026-06-05T07:24:11.670Z",
+      "paymentMethod": "cod",
+      "status": "paid",
+      "id": "LqhUNjf"
+    },
+    {
+      "userId": "8dvXGYX",
+      "courseId": "1",
+      "createdAt": "2026-06-06T04:45:46.811Z",
+      "paymentMethod": "cod",
+      "status": "paid",
+      "id": "j1iKJEVnHg4"
+    },
+    {
+      "userId": "BvL7V8X",
+      "courseId": "AKF4_q5",
+      "createdAt": "2026-06-06T04:47:56.083Z",
+      "paymentMethod": "cod",
+      "status": "paid",
+      "id": "OaeasPok7Kc"
+    },
+    {
+      "userId": "BvL7V8X",
+      "courseId": "2",
+      "createdAt": "2026-06-06T04:51:32.553Z",
+      "paymentMethod": "cod",
+      "status": "paid",
+      "id": "dx7EeAPl11I"
+    }
+  ],
+  "progress": [
+    {
+      "userId": "1",
+      "courseId": "ylJ2q0XmdAY",
+      "lessonId": "b3Zw8UoG36o",
+      "completed": true,
+      "completedAt": "2026-05-30T15:46:13.831Z",
+      "id": "46PEq8pF2kc"
+    },
+    {
+      "userId": "1",
+      "courseId": "ylJ2q0XmdAY",
+      "lessonId": "TKklZ5pgrF0",
+      "completed": true,
+      "completedAt": "2026-05-30T15:46:16.761Z",
+      "id": "IcD7cE-7LTk"
+    },
+    {
+      "userId": "1",
+      "courseId": "ylJ2q0XmdAY",
+      "lessonId": "b3Zw8UoG36o",
+      "completed": true,
+      "completedAt": "2026-05-30T15:48:11.406Z",
+      "id": "Xq6rPPvIErU"
+    },
+    {
+      "userId": "1",
+      "courseId": "ylJ2q0XmdAY",
+      "lessonId": "TKklZ5pgrF0",
+      "completed": true,
+      "completedAt": "2026-05-30T15:48:14.212Z",
+      "id": "EzSrxK2W2Fc"
+    },
+    {
+      "userId": "1",
+      "courseId": "ylJ2q0XmdAY",
+      "lessonId": "LvUljs52gLc",
+      "completed": true,
+      "completedAt": "2026-05-30T16:54:51.001Z",
+      "id": "pyQEH9jLbME"
+    },
+    {
+      "userId": "2",
+      "courseId": "ylJ2q0XmdAY",
+      "lessonId": "b3Zw8UoG36o",
+      "completed": true,
+      "completedAt": "2026-06-01T03:52:38.397Z",
+      "id": "9QkhGeE"
+    },
+    {
+      "userId": "1",
+      "courseId": "1",
+      "lessonId": "2",
+      "completed": true,
+      "completedAt": "2026-06-05T04:00:57.286Z",
+      "id": "Rv505-7"
+    },
+    {
+      "userId": "BvL7V8X",
+      "courseId": "NartWvT",
+      "lessonId": "tWEsQRk",
+      "completed": true,
+      "completedAt": "2026-06-05T07:19:56.674Z",
+      "id": "GWPqr6V"
+    }
+  ],
+  "ratings": [],
   "$schema": "./node_modules/json-server/schema.json"
 }

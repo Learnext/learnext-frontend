@@ -2,7 +2,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
-const CourseTable = ({ courses, onEdit, onDelete, onPublish }) => {
+const CourseTable = ({ courses, onEdit, onDelete, onTogglePublish }) => {
   const navigate = useNavigate();
 
   return (
@@ -27,7 +27,7 @@ const CourseTable = ({ courses, onEdit, onDelete, onPublish }) => {
                     {course.thumbnail ? (
                       <img src={course.thumbnail} alt="" />
                     ) : (
-                      <div className="thumb-placeholder">📚</div>
+                      <div className="thumb-placeholder"></div>
                     )}
                   </div>
                   <span>{course.title}</span>
@@ -37,7 +37,13 @@ const CourseTable = ({ courses, onEdit, onDelete, onPublish }) => {
               <td>{Number(course.price).toLocaleString("vi-VN")}đ</td>
               <td>{course.students}</td>
               <td>
-                <span className={`status-badge status-${course.status}`}>
+                <span
+                  className={`status-badge ${
+                    course.status === "published"
+                      ? "status-published"
+                      : "status-draft"
+                  }`}
+                >
                   {course.status === "published" ? "Đã đăng" : "Nháp"}
                 </span>
               </td>
@@ -51,20 +57,21 @@ const CourseTable = ({ courses, onEdit, onDelete, onPublish }) => {
                   >
                     Nội dung
                   </button>
+
+                  <button
+                    className="btn-action btn-publish"
+                    onClick={() => onTogglePublish(course)}
+                  >
+                    {course.status === "published" ? "Ẩn" : "Đăng"}
+                  </button>
+
                   <button
                     className="btn-action btn-edit"
                     onClick={() => onEdit(course)}
                   >
                     Sửa
                   </button>
-                  {course.status !== "published" && (
-                    <button
-                      className="btn-action btn-publish"
-                      onClick={() => onPublish(course.id)}
-                    >
-                      Publish
-                    </button>
-                  )}
+
                   <button
                     className="btn-action btn-delete"
                     onClick={() => onDelete(course.id)}

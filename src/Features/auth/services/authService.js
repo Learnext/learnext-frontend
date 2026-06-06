@@ -1,102 +1,72 @@
-const rawApiUrl = import.meta.env.VITE_API_URL;
-const API_URL = rawApiUrl
-  ? rawApiUrl.endsWith("/api/v1")
-    ? rawApiUrl
-    : `${rawApiUrl}/api/v1`
-  : "";
+const API_URL = import.meta.env.VITE_API_URL;
 
 const request = async (url, options = {}) => {
   const response = await fetch(url, options);
-  const data = response.status === 204 ? null : await response.json();
+
+  const data = await response.json();
 
   if (!response.ok) {
-    throw new Error(data?.error?.message || data?.message || "Request failed");
+    throw new Error(data.message || "Request failed");
   }
 
   return data;
 };
 
-const decodeJwtPayload = (token) => {
-  try {
-    const payload = token.split(".")[1];
-    const normalized = payload.replace(/-/g, "+").replace(/_/g, "/");
-    return JSON.parse(atob(normalized));
-  } catch {
-    return {};
-  }
-};
+export const loginService = async (email, password) => {
+  const users = await request(`${API_URL}/users`);
 
-const buildUserFromToken = (token, fallback = {}) => {
-  const claims = decodeJwtPayload(token);
+  const user = users.find(
+    (u) =>
+      u.email.trim().toLowerCase() === email.trim().toLowerCase() &&
+      u.password === password,
+  );
+
+  if (!user) {
+    return {
+      success: false,
+      message: "Sai email hoặc mật khẩu",
+    };
+  }
 
   return {
-    id: claims.sub || fallback.id,
-    email: claims.email || fallback.email,
-    fullName: fallback.fullName || fallback.name || claims.email || fallback.email,
-    role: fallback.role || "user",
+    success: true,
+    token: "fake-jwt-token",
+    user,
   };
 };
 
-export const loginService = async (email, password) => {
-  try {
-    const data = await request(`${API_URL}/auth/login`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email, password }),
-    });
-
-    if (data.refreshToken) {
-      localStorage.setItem("refresh-token", data.refreshToken);
-    }
-
-    return {
-      success: true,
-      token: data.accessToken,
-      refreshToken: data.refreshToken,
-      user: buildUserFromToken(data.accessToken, { email }),
-    };
-  } catch (error) {
-    return {
-      success: false,
-      message: error.message || "Invalid email or password",
-    };
-  }
-};
-
 export const signupService = async (formData) => {
-  try {
-    const registeredUser = await request(`${API_URL}/auth/register`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        email: formData.email,
-        password: formData.password,
-        fullName: formData.fullName || formData.username,
-      }),
-    });
+  const users = await request(`${API_URL}/users`);
 
-    const loginResult = await loginService(formData.email, formData.password);
+  const exists = users.find(
+    (u) => u.email.trim().toLowerCase() === formData.email.trim().toLowerCase(),
+  );
 
-    if (!loginResult.success) {
-      return loginResult;
-    }
-
-    return {
-      ...loginResult,
-      user: {
-        ...loginResult.user,
-        id: loginResult.user.id || registeredUser.id,
-        fullName: registeredUser.name || loginResult.user.fullName,
-      },
-    };
-  } catch (error) {
+  if (exists) {
     return {
       success: false,
-      message: error.message || "Sign up failed",
+      message: "Email đã tồn tại",
     };
   }
+
+  const newUser = {
+    username: formData.username,
+    email: formData.email,
+    password: formData.password,
+    role: "user",
+  };
+
+  const createdUser = await request(`${API_URL}/users`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(newUser),
+  });
+
+  return {
+    success: true,
+    token: "fake-jwt-token",
+    user: createdUser,
+  };
 };

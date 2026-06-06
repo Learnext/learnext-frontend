@@ -5,7 +5,7 @@ import {
   createCourseService,
   updateCourseService,
   deleteCourseService,
-  publishCourseService,
+  togglePublishService,
 } from "../services/instructorService";
 
 const EMPTY_FORM = {
@@ -16,8 +16,6 @@ const EMPTY_FORM = {
   tags: "",
   thumbnail: null,
   thumbnailPreview: null,
-  intro_video: null,
-  introVideoName: "",
 };
 
 export const useCourseManager = () => {
@@ -36,15 +34,26 @@ export const useCourseManager = () => {
   useEffect(() => {
     const load = async () => {
       setLoadingList(true);
+
       try {
         const data = await fetchCoursesService();
-        if (data.success) setCourses(data.courses);
+
+        if (data.success) {
+          const user = JSON.parse(localStorage.getItem("user"));
+
+          const myCourses = data.courses.filter(
+            (course) => String(course.instructorId) === String(user?.id),
+          );
+
+          setCourses(myCourses);
+        }
       } catch (err) {
         console.error("Lỗi tải khóa học:", err);
       } finally {
         setLoadingList(false);
       }
     };
+
     load();
   }, []);
 
@@ -57,22 +66,17 @@ export const useCourseManager = () => {
   const handleThumbnail = (e) => {
     const file = e.target.files[0];
     if (!file) return;
+
+    // Tạo preview để hiển thị trên UI
+    const previewUrl = URL.createObjectURL(file);
+
     if (formData.thumbnailPreview?.startsWith("blob:"))
       URL.revokeObjectURL(formData.thumbnailPreview);
+
     setFormData((prev) => ({
       ...prev,
       thumbnail: file,
-      thumbnailPreview: URL.createObjectURL(file),
-    }));
-  };
-
-  const handleIntroVideo = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    setFormData((prev) => ({
-      ...prev,
-      intro_video: file,
-      introVideoName: file.name,
+      thumbnailPreview: previewUrl,
     }));
   };
 
@@ -100,8 +104,6 @@ export const useCourseManager = () => {
       tags: course.tags || "",
       thumbnail: null,
       thumbnailPreview: course.thumbnail || null,
-      intro_video: null,
-      introVideoName: course.intro_video || "",
     });
     setFormError("");
     setFormSuccess("");
@@ -157,7 +159,6 @@ export const useCourseManager = () => {
         ...editingCourse,
         ...formData,
         thumbnail: formData.thumbnailPreview || editingCourse.thumbnail,
-        intro_video: formData.introVideoName || editingCourse.intro_video,
       };
       setCourses((prev) =>
         prev.map((c) => (c.id === editingCourse.id ? updated : c)),
@@ -187,17 +188,15 @@ export const useCourseManager = () => {
       setDeleteConfirm(null);
     }
   };
+  // ─── Publish / Unpublish ──────────────────────────
+  const togglePublish = async (course) => {
+    const newStatus = course.status === "published" ? "draft" : "published";
 
-  const handlePublish = async (id) => {
-    try {
-      const data = await publishCourseService(id);
-      if (!data.success) return;
-      setCourses((prev) =>
-        prev.map((c) => (c.id === id ? { ...c, ...data.course } : c)),
-      );
-    } catch (err) {
-      console.error(err);
-    }
+    const data = await togglePublishService(course.id, newStatus);
+
+    setCourses((prev) =>
+      prev.map((c) => (c.id === course.id ? data.course : c)),
+    );
   };
 
   return {
@@ -214,12 +213,11 @@ export const useCourseManager = () => {
     setDeleteConfirm,
     changeHandler,
     handleThumbnail,
-    handleIntroVideo,
     openCreate,
     openEdit,
     handleCreate,
     handleEdit,
     handleDelete,
-    handlePublish,
+    togglePublish,
   };
 };

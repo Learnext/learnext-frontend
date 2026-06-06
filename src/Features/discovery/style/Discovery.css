@@ -1,0 +1,27 @@
+.discovery-page {
+  padding: 40px;
+}
+
+.discovery-controls {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 30px;
+}
+
+.discovery-controls input,
+.discovery-controls select {
+  padding: 12px;
+  border: 1px solid #ddd;
+}
+
+.course-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.course-card {
+  border: 1px solid #eee;
+  padding: 20px;
+  border-radius: 10px;
+}

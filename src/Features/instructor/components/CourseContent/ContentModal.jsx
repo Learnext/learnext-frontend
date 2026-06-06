@@ -47,24 +47,42 @@ const ContentModal = ({
 
           {modal.type === "lesson" && (
             <>
+              {" "}
               <div className="form-group">
+                {" "}
                 <label>Loại nội dung</label>
                 <select
                   name="type"
                   value={formData.type || "video"}
                   onChange={changeHandler}
                 >
-                  <option value="video">🎬 Video</option>
-                  <option value="pdf">📄 PDF</option>
-                </select>
+                  {" "}
+                  <option value="video">🎬 Video</option>{" "}
+                  <option value="pdf">📄 PDF</option>{" "}
+                </select>{" "}
               </div>
-
+              ```
+              {/* URL video */}
+              {formData.type === "video" && (
+                <div className="form-group">
+                  <label>URL Video (Youtube, Vimeo, MP4...)</label>
+                  <input
+                    type="text"
+                    name="videoUrl"
+                    value={formData.videoUrl || ""}
+                    onChange={changeHandler}
+                    placeholder="https://..."
+                  />
+                </div>
+              )}
+              {/* Upload file */}
               <div className="form-group">
                 <label>
                   {modal.editing
-                    ? "Thay file mới (bỏ trống nếu không đổi)"
-                    : "Upload file *"}
+                    ? "Thay file mới (không bắt buộc)"
+                    : "Upload file"}
                 </label>
+
                 <div
                   className="upload-box-sm"
                   onClick={() => document.getElementById("lesson-file").click()}
@@ -78,6 +96,7 @@ const ContentModal = ({
                     </p>
                   )}
                 </div>
+
                 <input
                   id="lesson-file"
                   type="file"
@@ -88,6 +107,7 @@ const ContentModal = ({
                   style={{ display: "none" }}
                 />
               </div>
+              ```
             </>
           )}
 

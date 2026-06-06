@@ -1,0 +1,300 @@
+.checkout-page {
+  max-width: 1300px;
+  margin: 120px auto 50px;
+  padding: 0 30px;
+
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 30px;
+}
+
+.checkout-left {
+  background: white;
+  border-radius: 20px;
+  padding: 30px;
+
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.checkout-title {
+  font-size: 34px;
+  font-weight: 700;
+  margin-bottom: 30px;
+  color: #111827;
+}
+
+.checkout-course {
+  display: flex;
+  gap: 18px;
+
+  padding: 18px 0;
+
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.checkout-course:last-child {
+  border-bottom: none;
+}
+
+.checkout-course img {
+  width: 180px;
+  height: 100px;
+
+  object-fit: cover;
+
+  border-radius: 12px;
+}
+
+.checkout-course-info {
+  flex: 1;
+}
+
+.checkout-course-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 10px;
+}
+
+.checkout-course-price {
+  color: #ef4444;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.checkout-right {
+  background: white;
+  border-radius: 20px;
+  padding: 30px;
+
+  height: fit-content;
+
+  position: sticky;
+  top: 100px;
+
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.summary-title {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 25px;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+
+  margin-bottom: 15px;
+
+  color: #4b5563;
+}
+
+.summary-total {
+  display: flex;
+  justify-content: space-between;
+
+  margin-top: 20px;
+  padding-top: 20px;
+
+  border-top: 1px solid #e5e7eb;
+
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.payment-title {
+  margin-top: 30px;
+  margin-bottom: 15px;
+
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.payment-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.payment-item {
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+
+  padding: 15px;
+
+  cursor: pointer;
+
+  transition: 0.25s;
+}
+
+.payment-item:hover {
+  border-color: #4f46e5;
+}
+
+.payment-item.active {
+  border-color: #4f46e5;
+  background: #eef2ff;
+}
+
+.payment-item input {
+  margin-right: 10px;
+}
+
+.confirm-payment-btn {
+  width: 100%;
+  height: 60px;
+
+  margin-top: 30px;
+
+  border: none;
+  border-radius: 14px;
+
+  background: linear-gradient(135deg, #4f46e5, #6366f1);
+
+  color: white;
+
+  font-size: 18px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition: 0.25s;
+}
+
+.confirm-payment-btn:hover {
+  transform: translateY(-2px);
+}
+
+.confirm-payment-btn:active {
+  transform: scale(0.98);
+}
+
+@media (max-width: 1000px) {
+  .checkout-page {
+    grid-template-columns: 1fr;
+  }
+
+  .checkout-right {
+    position: static;
+  }
+
+  .checkout-course {
+    flex-direction: column;
+  }
+
+  .checkout-course img {
+    width: 100%;
+    height: 220px;
+  }
+}
+/* ================= QR PAYMENT ================= */
+
+.qr-modal {
+  position: fixed;
+  inset: 0;
+
+  background: rgba(0, 0, 0, 0.6);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  z-index: 9999;
+}
+
+.qr-box {
+  width: 450px;
+  max-width: 95%;
+
+  background: white;
+  border-radius: 20px;
+
+  padding: 30px;
+
+  text-align: center;
+
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+
+  animation: popupFade 0.25s ease;
+}
+
+.qr-box h3 {
+  font-size: 24px;
+  font-weight: 700;
+
+  margin-bottom: 20px;
+
+  color: #111827;
+}
+
+.payment-qr {
+  width: 260px;
+  height: 260px;
+
+  object-fit: contain;
+
+  margin: 0 auto 20px;
+
+  display: block;
+}
+
+.bank-info {
+  text-align: left;
+
+  background: #f9fafb;
+
+  border-radius: 12px;
+
+  padding: 15px;
+
+  margin-bottom: 20px;
+}
+
+.bank-info p {
+  margin: 8px 0;
+
+  color: #374151;
+  font-size: 15px;
+}
+
+.bank-info strong {
+  color: #111827;
+}
+
+.cancel-btn {
+  width: 100%;
+  height: 50px;
+
+  margin-top: 10px;
+
+  border: none;
+  border-radius: 12px;
+
+  background: #e5e7eb;
+
+  color: #111827;
+
+  font-size: 16px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: 0.25s;
+}
+
+.cancel-btn:hover {
+  background: #d1d5db;
+}
+
+@keyframes popupFade {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

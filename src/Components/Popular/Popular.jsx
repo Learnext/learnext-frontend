@@ -1,27 +1,37 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import "./Popular.css";
-import data_product from "../../Assets/Frontend_Assets/data";
 import Item from "../Item/Item";
 
-const Popular = ({ items = data_product }) => {
+const API = "http://localhost:5000";
+
+const Popular = () => {
+  const [courses, setCourses] = useState([]);
+
+  useEffect(() => {
+    fetch(`${API}/courses`)
+      .then((res) => res.json())
+      .then((data) =>
+        setCourses(data.filter((course) => course.status === "published")),
+      )
+      .catch((err) => console.error(err));
+  }, []);
+
   return (
     <div className="popular">
       <h1>Popular Courses</h1>
       <hr />
       <div className="popular-items">
-        {items.map((item) => {
-          return (
-            <Item
-              key={item.id}
-              id={item.id}
-              name={item.name}
-              image={item.image}
-              new_price={item.new_price}
-              old_price={item.old_price}
-              instructorName={item.instructorName}
-            />
-          );
-        })}
+        {courses.map((item) => (
+          <Item
+            key={item.id}
+            id={item.id}
+            title={item.title}
+            thumbnail={item.thumbnail}
+            price={item.price}
+            category={item.category}
+            description={item.description}
+          />
+        ))}
       </div>
     </div>
   );

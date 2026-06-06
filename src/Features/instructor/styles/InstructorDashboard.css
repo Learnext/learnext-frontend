@@ -152,3 +152,30 @@
     grid-template-columns: 1fr;
   }
 }
+
+.instructor-topbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 20px;
+}
+
+.back-home-btn {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+
+  background: #4f46e5;
+  color: white;
+
+  cursor: pointer;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  transition: 0.2s;
+}
+
+.back-home-btn:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}

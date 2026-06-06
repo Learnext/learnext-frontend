@@ -1,0 +1,193 @@
+.course-detail {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 100px 40px 60px;
+  display: flex;
+  gap: 40px;
+  align-items: flex-start;
+}
+
+/* ── LEFT ── */
+.course-detail-left {
+  flex: 1;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
+}
+
+.course-detail-left img {
+  width: 100%;
+  height: 420px;
+  object-fit: cover;
+  display: block;
+}
+
+/* ── RIGHT ── */
+.course-detail-right {
+  width: 380px;
+  flex-shrink: 0;
+  background: #fff;
+  border-radius: 24px;
+  padding: 32px;
+  position: sticky;
+  top: 90px;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.1);
+  border: 1px solid #f0f0f0;
+}
+
+.course-detail-title {
+  font-size: 26px;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1.4;
+  margin-bottom: 14px;
+}
+
+.course-detail-desc {
+  font-size: 15px;
+  line-height: 1.8;
+  color: #6b7280;
+  margin-bottom: 24px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.course-detail-price {
+  font-size: 36px;
+  font-weight: 800;
+  color: #ef4444;
+  margin-bottom: 28px;
+  letter-spacing: -0.5px;
+}
+
+/* ── BUTTONS ── */
+.course-detail-btn,
+.learn-btn {
+  width: 100%;
+  height: 52px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.course-detail-btn {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+  margin-bottom: 12px;
+  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.35);
+}
+
+.course-detail-btn:hover {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.45);
+  transform: translateY(-1px);
+}
+
+.course-detail-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.learn-btn {
+  background: #f9fafb;
+  color: #111827;
+  border: 1.5px solid #e5e7eb;
+}
+
+.learn-btn:hover {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+  transform: translateY(-1px);
+}
+
+/* ── BADGE ĐÃ MUA (dùng trong Item.jsx) ── */
+.item-image-wrapper {
+  position: relative;
+}
+
+.item-bought-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: #10b981;
+  color: white;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 999px;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 1000px) {
+  .course-detail {
+    flex-direction: column;
+    padding: 80px 20px 40px;
+  }
+
+  .course-detail-left img {
+    height: 280px;
+  }
+
+  .course-detail-right {
+    width: 100%;
+    position: static;
+  }
+
+  .course-detail-title {
+    font-size: 22px;
+  }
+
+  .course-detail-price {
+    font-size: 28px;
+  }
+}
+
+@media (max-width: 600px) {
+  .course-detail {
+    padding: 70px 16px 40px;
+    gap: 24px;
+  }
+
+  .course-detail-right {
+    padding: 24px;
+  }
+}
+.buy-now-btn {
+  width: 100%;
+  height: 52px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: white;
+  margin-bottom: 12px;
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.35);
+}
+
+.buy-now-btn:hover {
+  background: linear-gradient(135deg, #d97706, #b45309);
+  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.45);
+  transform: translateY(-1px);
+}
+
+.buy-now-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}

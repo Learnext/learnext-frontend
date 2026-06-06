@@ -1,5 +1,8 @@
 import "./App.css";
+
 import Navbar from "./Components/Navbar/Navbar.jsx";
+import Footers from "./Components/Footers/Footers.jsx";
+
 import {
   BrowserRouter as Router,
   Routes,
@@ -7,67 +10,69 @@ import {
   useLocation,
 } from "react-router-dom";
 
-import Shop from "./Features/shop/pages/Shop.jsx";
-import Product from "./Features/shop/pages/Product.jsx";
-import Cart from "./Features/shop/pages/Cart.jsx";
+import Shop from "./pages/Shop.jsx";
+import Cart from "./pages/Cart.jsx";
+import CourseDetail from "./pages/CourseDetail.jsx";
+import SearchPage from "./pages/SearchPage.jsx";
+
 import LoginSignup from "./Features/auth/pages/LoginSignup.jsx";
-
-import Footers from "./Components/Footers/Footers.jsx";
-
 import Profile from "./Features/profile/pages/Profile.jsx";
-import Support from "./Features/Support/pages/Support.jsx";
-import Activate from "./Features/account/pages/Activate.jsx";
-import AdminConsole from "./Features/account/pages/AdminConsole.jsx";
-import Learning from "./Features/account/pages/Learning.jsx";
-import Orders from "./Features/account/pages/Orders.jsx";
-
-import CourseManager from "./Features/instructor/pages/CourseManager.jsx";
-import InstructorDashboard from "./Features/instructor/pages/InstructorDashboard.jsx";
+import Support from "./Features/support/pages/Support.jsx";
+import CheckoutPage from "./pages/CheckoutPage.jsx";
+import LearningPage from "./pages/LearningPage.jsx";
+import MyCourses from "./pages/MyCourses.jsx";
 import InstructorLayout from "./Features/instructor/components/InstructorLayout.jsx";
+import InstructorDashboard from "./Features/instructor/pages/InstructorDashboard.jsx";
+import CourseManager from "./Features/instructor/pages/CourseManager.jsx";
+import CourseContent from "./Features/instructor/pages/CourseContent.jsx";
 
 function AppContent() {
   const location = useLocation();
+
   const isInstructorPage = location.pathname.startsWith("/instructor");
 
+  const hideFooter =
+    location.pathname.startsWith("/cart") ||
+    location.pathname.startsWith("/course") ||
+    location.pathname.startsWith("/my-courses") ||
+    location.pathname.startsWith("/checkout");
+
   return (
-    <>
-      {/* Chỉ hiện navbar ngoài instructor */}
+    <div className="app-layout">
       {!isInstructorPage && <Navbar />}
 
-      <Routes>
-        {/* Public pages */}
-        <Route path="/" element={<Shop />} />
-        {/* <Route path="/business" element={<Business />} /> */}
-        {/* <Route path="/member" element={<Member />} /> */}
-        <Route path="/products/:productId" element={<Product />} />
-        <Route path="/cart" element={<Cart />} />
-        <Route path="/login" element={<LoginSignup />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/support" element={<Support />} />
-        <Route path="/orders" element={<Orders />} />
-        <Route path="/activate" element={<Activate />} />
-        <Route path="/learning" element={<Learning />} />
-        <Route path="/admin" element={<AdminConsole />} />
+      <div className="page-content">
+        <Routes>
+          <Route path="/" element={<Shop />} />
 
-        {/* Instructor */}
-        <Route path="/instructor" element={<InstructorLayout />}>
-          <Route index element={<InstructorDashboard />} />
-          <Route path="courses" element={<CourseManager />} />
-        </Route>
-      </Routes>
+          <Route path="/cart" element={<Cart />} />
+          <Route path="/login" element={<LoginSignup />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/course/:id" element={<CourseDetail />} />
+          <Route path="/course/:courseId/learn" element={<LearningPage />} />
+          <Route path="/my-courses" element={<MyCourses />} />
+          <Route path="/support" element={<Support />} />
+          <Route path="/search" element={<SearchPage />} />
+          <Route path="/checkout" element={<CheckoutPage />} />
+          <Route path="/instructor" element={<InstructorLayout />}>
+            <Route index element={<InstructorDashboard />} />
+            <Route path="courses" element={<CourseManager />} />
+            <Route
+              path="courses/:courseId/content"
+              element={<CourseContent />}
+            />
+          </Route>
+        </Routes>
+      </div>
 
-      {/* Chỉ hiện footer ngoài instructor */}
-      {!isInstructorPage && <Footers />}
-    </>
+      {!isInstructorPage && !hideFooter && <Footers />}
+    </div>
   );
 }
-
-function App() {
+export default function App() {
   return (
     <Router>
       <AppContent />
     </Router>
   );
 }
-
-export default App;

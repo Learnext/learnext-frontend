@@ -30,8 +30,9 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     localStorage.removeItem("auth-token");
-    localStorage.removeItem("refresh-token");
     localStorage.removeItem("user");
+    window.dispatchEvent(new Event("cartUpdated"));
+    localStorage.removeItem("guest-cart");
     setUser(null);
   };
 
