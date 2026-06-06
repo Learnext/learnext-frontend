@@ -1,9 +1,14 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation, Navigate } from "react-router-dom";
 import "./CSS/CheckoutPage.css";
 import { useAuth } from "../Features/auth/context/AuthContext";
+import { notifyError, notifySuccess } from "../utils/notify";
+import apiFetch from "../utils/apiFetch";
 
-const API = "http://localhost:1201/api/v1";
+const rawApiUrl = import.meta.env.VITE_API_URL;
+const API = rawApiUrl
+  ? rawApiUrl.endsWith("/api/v1") ? rawApiUrl : `${rawApiUrl}/api/v1`
+  : "http://localhost:1201/api/v1";
 
 const CheckoutPage = () => {
   const { user } = useAuth();
@@ -12,7 +17,29 @@ const CheckoutPage = () => {
 
   const [loading, setLoading] = useState(false);
   const [orderData, setOrderData] = useState(null);
-  const [proofFile, setProofFile] = useState(null);
+
+  useEffect(() => {
+    if (!orderData?.id || orderData.status === "PAID") return undefined;
+
+    const timer = setInterval(async () => {
+      try {
+        const res = await apiFetch(`${API}/orders`);
+        const json = await res.json();
+        const latest = (json.data || []).find((order) => order.id === orderData.id);
+        if (latest) {
+          setOrderData(latest);
+          if (latest.status === "PAID") {
+            notifySuccess("Thanh toán đã được xác nhận tự động.");
+            navigate("/my-courses");
+          }
+        }
+      } catch (err) {
+        console.error("LOG [PaymentPoll]:", err);
+      }
+    }, 5000);
+
+    return () => clearInterval(timer);
+  }, [navigate, orderData?.id, orderData?.status]);
 
   if (!targetCourse) {
     return <Navigate to="/" replace />;
@@ -27,95 +54,43 @@ const CheckoutPage = () => {
     }
 
     setLoading(true);
-    const token = localStorage.getItem("auth-token");
-    console.log(
-      "LOG [CreateOrder]: Đang gửi request tạo đơn với Token:",
-      token ? "OK" : "MISSING",
-    );
-
     try {
-      const res = await fetch(`${API}/orders`, {
+      const res = await apiFetch(`${API}/orders`, {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ courseId: targetCourse.courseId }),
       });
-
-      console.log("LOG [CreateOrder]: Status Code:", res.status);
-
-      if (res.status === 401) {
-        console.warn("LOG [CreateOrder]: Lỗi 401 - Token không hợp lệ!");
-        alert("Phiên đăng nhập hết hạn, vui lòng đăng nhập lại.");
-        navigate("/login");
-        return;
-      }
-
       const json = await res.json();
-      console.log("LOG [CreateOrder]: Response JSON:", json);
 
       if (res.ok && json.success) {
         setOrderData(json.data);
       } else {
-        alert(json.error?.message || "Tạo đơn hàng thất bại");
+        notifyError(json.error?.message || "Tạo đơn hàng thất bại");
       }
     } catch (err) {
-      console.error("LOG [CreateOrder]: Lỗi Catch:", err);
-      alert("Đã xảy ra lỗi hệ thống.");
+      notifyError(err.message || "Đã xảy ra lỗi hệ thống.");
     } finally {
       setLoading(false);
     }
   };
 
-  // BƯỚC 2: UPLOAD MINH CHỨNG
-  const handleSubmitProof = async () => {
-    if (!proofFile) return alert("Vui lòng chọn file minh chứng!");
-    if (!orderData || !orderData.id) {
-      console.error("LOG [Upload]: OrderData bị null hoặc thiếu ID");
-      return;
-    }
-
+  const handleConfirmPaid = async () => {
+    if (!orderData?.paymentCode) return;
     setLoading(true);
-    const token = localStorage.getItem("auth-token");
-    const formData = new FormData();
-    formData.append("proofFile", proofFile);
-
-    console.log(
-      "LOG [Upload]: Đang gửi ảnh tới URL:",
-      `${API}/orders/${orderData.id}/proof`,
-    );
-
     try {
-      const res = await fetch(`${API}/orders/${orderData.id}/proof`, {
+      const res = await apiFetch(`${API}/payments/simulate-confirm`, {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: formData,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ paymentCode: orderData.paymentCode }),
       });
-
-      console.log("LOG [Upload]: Status Code:", res.status);
-
-      // Bắt lỗi 500 trước khi parse JSON
-      if (res.status === 500) {
-        console.error(
-          "LOG [Upload]: Server trả về lỗi 500. Kiểm tra Terminal Backend!",
-        );
-      }
-
       const json = await res.json();
-      console.log("LOG [Upload]: Response JSON:", json);
-
-      if (res.ok && json.success) {
-        alert("Gửi minh chứng thành công!");
-        navigate("/my-courses");
-      } else {
-        alert(json.error?.message || "Gửi minh chứng thất bại");
+      if (!res.ok || !json.success) {
+        throw new Error(json.error?.message || "Xác nhận thanh toán thất bại");
       }
+      notifySuccess("Đã giả lập thanh toán. Hệ thống đã gửi mail kích hoạt.");
+      navigate("/invoices");
     } catch (err) {
-      console.error("LOG [Upload]: Lỗi Catch:", err);
-      alert("Lỗi upload ảnh.");
+      notifyError(err.message || "Không thể xác nhận thanh toán.");
     } finally {
       setLoading(false);
     }
@@ -168,17 +143,10 @@ const CheckoutPage = () => {
             </div>
 
             <div className="proof-upload-section">
-              <h4>Tải minh chứng thanh toán</h4>
-              <input
-                type="file"
-                onChange={(e) => setProofFile(e.target.files[0])}
-              />
-              <button
-                className="confirm-payment-btn"
-                onClick={handleSubmitProof}
-                disabled={loading || !proofFile}
-              >
-                Xác nhận đã chuyển khoản
+              <h4>Thanh toán giả lập</h4>
+              <p>Vui lòng chuyển khoản đúng nội dung: {orderData.paymentCode}</p>
+              <button className="confirm-payment-btn" onClick={handleConfirmPaid} disabled={loading}>
+                {loading ? "Đang xác nhận..." : "Tôi đã thanh toán"}
               </button>
             </div>
           </div>

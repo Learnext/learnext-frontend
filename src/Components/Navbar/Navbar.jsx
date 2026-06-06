@@ -175,6 +175,9 @@ const Navbar = () => {
 
       {/* Right */}
       <div className="nav-login-cart">
+        <Link to="/cart">
+          <button className="login-btn">Gio hang</button>
+        </Link>
         <ul className="nav-menu">
           {/* Nút Hỗ trợ hiển thị ở ngoài CHO KHÁCH CHƯA ĐĂNG NHẬP */}
           {!user && (
@@ -205,9 +208,21 @@ const Navbar = () => {
                   <div className="nav-dropdown-item">Trang cá nhân</div>
                 </Link>
 
-                {localStorage.getItem("instructorId") && (
+                <Link to="/invoices" onClick={() => setDropdownOpen(false)}>
+                  <div className="nav-dropdown-item">Hóa đơn</div>
+                </Link>
+
+                {/* Da la giang vien -> hien Dashboard; chua -> hien Dang ky */}
+                {localStorage.getItem("instructorId") ? (
                   <Link to="/instructor" onClick={() => setDropdownOpen(false)}>
-                    <div className="nav-dropdown-item">Dashboard</div>
+                    <div className="nav-dropdown-item">Dashboard giảng viên</div>
+                  </Link>
+                ) : (
+                  <Link
+                    to="/instructor-apply"
+                    onClick={() => setDropdownOpen(false)}
+                  >
+                    <div className="nav-dropdown-item">Đăng ký giảng viên</div>
                   </Link>
                 )}
 

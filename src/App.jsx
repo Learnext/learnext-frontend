@@ -24,12 +24,21 @@ import MyCourses from "./pages/MyCourses.jsx";
 import InstructorLayout from "./Features/instructor/components/InstructorLayout.jsx";
 import InstructorDashboard from "./Features/instructor/pages/InstructorDashboard.jsx";
 import CourseManager from "./Features/instructor/pages/CourseManager.jsx";
-//import CourseContent from "./Features/instructor/pages/CourseContent.jsx";
+import CourseContent from "./Features/instructor/pages/CourseContent.jsx";
+import InstructorSales from "./Features/instructor/pages/InstructorSales.jsx";
+import InstructorApplyPage from "./pages/InstructorApplyPage.jsx";
+import AdminPage from "./pages/AdminPage.jsx";
+import InvoicesPage from "./pages/InvoicesPage.jsx";
+import CartPage from "./pages/CartPage.jsx";
+import ActivatePage from "./pages/ActivatePage.jsx";
 
 function AppContent() {
   const location = useLocation();
 
   const isInstructorPage = location.pathname.startsWith("/instructor");
+  const isAdminPage = location.pathname.startsWith("/admin");
+  // Trang dung khung rieng -> an Navbar/Footer cua site
+  const isStandalone = isInstructorPage || isAdminPage;
 
   const hideFooter =
     location.pathname.startsWith("/cart") ||
@@ -39,7 +48,7 @@ function AppContent() {
 
   return (
     <div className="app-layout">
-      {!isInstructorPage && <Navbar />}
+      {!isStandalone && <Navbar />}
 
       <div className="page-content">
         <Routes>
@@ -54,14 +63,21 @@ function AppContent() {
           <Route path="/support" element={<Support />} />
           <Route path="/search" element={<SearchPage />} />
           <Route path="/checkout" element={<CheckoutPage />} />
+          <Route path="/cart" element={<CartPage />} />
+          <Route path="/activate" element={<ActivatePage />} />
+          <Route path="/instructor-apply" element={<InstructorApplyPage />} />
+          <Route path="/invoices" element={<InvoicesPage />} />
+          <Route path="/admin" element={<AdminPage />} />
           <Route path="/instructor" element={<InstructorLayout />}>
             <Route index element={<InstructorDashboard />} />
             <Route path="courses" element={<CourseManager />} />
+            <Route path="courses/:courseId/content" element={<CourseContent />} />
+            <Route path="sales" element={<InstructorSales />} />
           </Route>
         </Routes>
       </div>
 
-      {!isInstructorPage && !hideFooter && <Footers />}
+      {!isStandalone && !hideFooter && <Footers />}
     </div>
   );
 }

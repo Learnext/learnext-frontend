@@ -19,6 +19,13 @@ const LearningPage = () => {
   const [hasBought, setHasBought] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  // Thao luan / trao doi voi giang vien
+  const [comments, setComments] = useState([]);
+  const [commentContent, setCommentContent] = useState("");
+  const [replyContent, setReplyContent] = useState({});
+  const [replyingTo, setReplyingTo] = useState(null);
+  const [sending, setSending] = useState(false);
+
   useEffect(() => {
     const loadLearningData = async () => {
       try {
@@ -62,6 +69,7 @@ const LearningPage = () => {
                   null,
               );
             }
+            await loadComments();
           }
         }
       } catch (err) {
@@ -72,7 +80,164 @@ const LearningPage = () => {
     };
 
     loadLearningData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [courseId, user, isPreviewMode]);
+
+  const loadComments = async () => {
+    const token = localStorage.getItem("auth-token");
+    const res = await fetch(`${API}/courses/${courseId}/comments`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
+    if (res.ok) {
+      const json = await res.json();
+      setComments(json.data || []);
+    }
+  };
+
+  const postComment = async (content, parentId = null) => {
+    const text = (content || "").trim();
+    if (!text) return;
+    const token = localStorage.getItem("auth-token");
+    setSending(true);
+    try {
+      const res = await fetch(`${API}/courses/${courseId}/comments`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ content: text, parentId }),
+      });
+      const json = await res.json();
+      if (!res.ok || !json.success) {
+        throw new Error(json.error?.message || "Khong the gui");
+      }
+      await loadComments();
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const submitComment = async (e) => {
+    e.preventDefault();
+    try {
+      await postComment(commentContent);
+      setCommentContent("");
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const submitReply = async (e, contentKey, parentId) => {
+    e.preventDefault();
+    try {
+      await postComment(replyContent[contentKey] || "", parentId);
+      setReplyContent((prev) => ({ ...prev, [contentKey]: "" }));
+      setReplyingTo(null);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // Flat nesting: reply luon gan vao comment goc (rootId)
+  const renderComment = (comment, nested = false, rootId = null) => {
+    const effectiveParentId = nested ? rootId : comment.id;
+    return (
+      <div
+        key={comment.id}
+        style={{
+          marginTop: 12,
+          marginLeft: nested ? 28 : 0,
+          padding: "10px 14px",
+          background: nested ? "#f1f5f9" : "#fff",
+          border: "1px solid #e5e7eb",
+          borderRadius: 8,
+        }}
+      >
+        <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
+          <b style={{ fontSize: 13 }}>{comment.userName}</b>
+          <span style={{ fontSize: 11, color: "#9ca3af" }}>
+            {comment.createdAt ? new Date(comment.createdAt).toLocaleString("vi-VN") : ""}
+          </span>
+        </div>
+        <p style={{ margin: "6px 0", fontSize: 14, whiteSpace: "pre-wrap" }}>{comment.content}</p>
+        <button
+          onClick={() => setReplyingTo(replyingTo === comment.id ? null : comment.id)}
+          style={{ background: "none", border: "none", color: "#2563eb", cursor: "pointer", fontSize: 12, padding: 0 }}
+        >
+          Tra loi
+        </button>
+        {replyingTo === comment.id && (
+          <form
+            onSubmit={(e) => submitReply(e, comment.id, effectiveParentId)}
+            style={{ marginTop: 8 }}
+          >
+            <textarea
+              value={replyContent[comment.id] || ""}
+              onChange={(e) =>
+                setReplyContent((prev) => ({ ...prev, [comment.id]: e.target.value }))
+              }
+              placeholder={`Tra loi @${comment.userName}...`}
+              rows={2}
+              required
+              style={{ width: "100%", padding: 8, borderRadius: 6, border: "1px solid #d1d5db", fontSize: 13, boxSizing: "border-box", resize: "vertical" }}
+            />
+            <button
+              type="submit"
+              disabled={sending}
+              style={{ marginTop: 6, background: "#2563eb", color: "#fff", border: "none", borderRadius: 5, padding: "6px 14px", fontSize: 12, cursor: "pointer" }}
+            >
+              Gui phan hoi
+            </button>
+          </form>
+        )}
+        {(comment.replies || []).map((reply) =>
+          renderComment(reply, true, rootId || comment.id),
+        )}
+      </div>
+    );
+  };
+
+  const Discussion = () => (
+    <section
+      style={{
+        marginTop: 32,
+        background: "#f9fafb",
+        border: "1px solid #e5e7eb",
+        borderRadius: 12,
+        padding: 20,
+      }}
+    >
+      <h2 style={{ marginTop: 0, fontSize: 18 }}>Thao luan voi giang vien</h2>
+      <p style={{ color: "#6b7280", fontSize: 13, marginTop: -4 }}>
+        Dat cau hoi hoac trao doi ve noi dung khoa hoc. Giang vien va hoc vien khac co the phan hoi.
+      </p>
+
+      <form onSubmit={submitComment} style={{ marginBottom: 16 }}>
+        <textarea
+          value={commentContent}
+          onChange={(e) => setCommentContent(e.target.value)}
+          placeholder="Nhap cau hoi / trao doi cua ban..."
+          rows={3}
+          required
+          style={{ width: "100%", padding: 10, borderRadius: 8, border: "1px solid #d1d5db", fontSize: 14, boxSizing: "border-box", resize: "vertical" }}
+        />
+        <button
+          type="submit"
+          disabled={sending}
+          style={{ marginTop: 8, background: sending ? "#9ca3af" : "#2563eb", color: "#fff", border: "none", borderRadius: 6, padding: "8px 18px", fontSize: 14, fontWeight: 600, cursor: sending ? "not-allowed" : "pointer" }}
+        >
+          {sending ? "Dang gui..." : "Gui"}
+        </button>
+      </form>
+
+      {comments.length === 0 ? (
+        <p style={{ color: "#9ca3af", fontSize: 14 }}>Chua co thao luan nao. Hay la nguoi dau tien!</p>
+      ) : (
+        comments.map((comment) => renderComment(comment))
+      )}
+    </section>
+  );
 
   const markCompleted = async () => {
     if (!hasBought || !currentLesson || currentLesson.isCompleted) return;
@@ -152,6 +317,7 @@ const LearningPage = () => {
               Quay lại khóa học của tôi
             </button>
           </div>
+          <div style={{ textAlign: "left" }}>{Discussion()}</div>
         </main>
       </div>
     );
@@ -254,6 +420,8 @@ const LearningPage = () => {
             <h2>Chọn bài học để bắt đầu</h2>
           </div>
         )}
+
+        {Discussion()}
       </main>
     </div>
   );

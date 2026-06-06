@@ -8,6 +8,7 @@ import AuthSwitch from "../components/AuthSwitch";
 
 import { loginService, signupService } from "../services/authService";
 import { useAuthForm } from "../hooks/useAuthForm";
+import { notifySuccess } from "../../../utils/notify";
 
 const LoginSignup = () => {
   const navigate = useNavigate();
@@ -44,7 +45,7 @@ const LoginSignup = () => {
       login(data.token, data.user);
 
       if (state === "Sign Up") {
-        alert("Đăng ký thành công!");
+        notifySuccess("Đăng ký thành công!");
       }
 
       const redirectPath = localStorage.getItem("redirect-after-login");

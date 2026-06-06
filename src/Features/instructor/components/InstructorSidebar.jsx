@@ -7,8 +7,9 @@ const InstructorSidebar = () => {
   const location = useLocation();
 
   const navItems = [
-    { to: "/instructor", label: "Dashboard", exact: true },
-    { to: "/instructor/courses", label: "Khóa học", exact: false },
+    { to: "/instructor",         label: "Dashboard",  exact: true  },
+    { to: "/instructor/courses", label: "Khoa hoc",   exact: false },
+    { to: "/instructor/sales",   label: "Doanh thu",  exact: false },
   ];
 
   const isActive = (to, exact) => {

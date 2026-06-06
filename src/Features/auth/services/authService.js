@@ -1,4 +1,3 @@
-import { INSTRUCTORS } from "../../../config/instructors";
 const rawApiUrl = import.meta.env.VITE_API_URL;
 const API_URL = rawApiUrl
   ? rawApiUrl.endsWith("/api/v1")
@@ -57,7 +56,20 @@ export const loginService = async (email, password) => {
     ...profile,
     id: payload.sub || payload.userId || payload.id,
   };
-  const instructorId = INSTRUCTORS[user.email];
+  let instructorId = null;
+  try {
+    const teacherRes = await fetch(`${API_URL}/teachers/me`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    if (teacherRes.ok) {
+      const teacherJson = await teacherRes.json();
+      instructorId = teacherJson.data?.id || null;
+    }
+  } catch {
+    // User is not an approved instructor yet.
+  }
 
   if (instructorId) {
     localStorage.setItem("instructorId", instructorId);

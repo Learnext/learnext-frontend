@@ -1,5 +1,3 @@
-import { INSTRUCTORS } from "../../../config/instructors";
-
 const rawApiUrl = import.meta.env.VITE_API_URL;
 
 const API_URL = rawApiUrl
@@ -17,28 +15,23 @@ export const authHeaders = (isJson = false) => {
 };
 
 export const instructorHeaders = (isJson = false) => {
-  const user = JSON.parse(localStorage.getItem("user") || "{}");
-  const instructorId =
-    INSTRUCTORS[user.email] || localStorage.getItem("instructorId") || "";
-
+  const instructorId = localStorage.getItem("instructorId") || "";
   return {
     "X-Instructor-Id": instructorId,
     ...(isJson && { "Content-Type": "application/json" }),
   };
 };
 
+// ĐÃ SỬA: Hàm fetchApi an toàn hơn, chống Crash khi Body rỗng
 const fetchApi = async (url, options = {}) => {
   const res = await fetch(url, options);
+
   if (!res.ok) {
     const err = await res.text();
     throw new Error(`HTTP ${res.status}: ${err}`);
   }
-
-  if (res.status === 204) {
-    return null;
-  }
-
   const json = await res.json();
+  // BE trả về { success, data } hoặc trực tiếp object
   return json?.data !== undefined ? json.data : json;
 };
 
@@ -99,26 +92,31 @@ const uploadFile = async (file) => {
 
 export const fetchStatsService = async () => {
   try {
-    const courses = await fetchApi(`${API_URL}/instructor/courses`, {
-      headers: instructorHeaders(),
-    });
+    const [courses, salesData] = await Promise.all([
+      fetchApi(`${API_URL}/instructor/courses`, { headers: instructorHeaders() }),
+      fetchApi(`${API_URL}/instructor/sales`,   { headers: instructorHeaders() }).catch(() => null),
+    ]);
 
     return {
       success: true,
       stats: {
-        totalCourses: courses.length,
-        totalStudents: courses.reduce((sum, c) => sum + (c.students || 0), 0),
-        totalRevenue: courses.reduce(
-          (sum, c) => sum + (c.price || 0) * (c.students || 0),
-          0,
-        ),
-        recentCourses: courses.slice(-5).reverse(),
+        totalCourses:   courses.length,
+        totalStudents:  salesData?.totalStudents  ?? 0,
+        totalRevenue:   salesData?.totalRevenue   ?? 0,
+        recentCourses:  courses.slice(0, 5),
       },
     };
   } catch (err) {
     console.error(err);
     return { success: false, stats: null };
   }
+};
+
+export const fetchInstructorSalesService = async () => {
+  const data = await fetchApi(`${API_URL}/instructor/sales`, {
+    headers: instructorHeaders(),
+  });
+  return { success: true, ...data };
 };
 
 export const fetchCoursesService = async () => {
@@ -363,13 +361,15 @@ export const createOrderService = async (courseId) => {
 
 export const submitPaymentProofService = async (orderId, proofFile) => {
   const token = localStorage.getItem("auth-token");
-  const formData = new FormData();
-  formData.append("proofFile", proofFile);
+  const paymentProofUrl = await uploadFile(proofFile);
 
   const res = await fetch(`${API_URL}/orders/${orderId}/proof`, {
     method: "POST",
-    headers: { Authorization: `Bearer ${token}` },
-    body: formData,
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ paymentProofUrl }),
   });
 
   const json = await res.json();
@@ -454,7 +454,7 @@ export const activateCourseService = async (activationCode) => {
   const data = await fetchApi(`${API_URL}/activations/activate`, {
     method: "POST",
     headers: authHeaders(true),
-    body: JSON.stringify({ code: activationCode }),
+    body: JSON.stringify({ activationCode }),
   });
 
   return { success: true, ...data };
