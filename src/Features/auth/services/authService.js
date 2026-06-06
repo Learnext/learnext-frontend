@@ -1,102 +1,111 @@
+import { INSTRUCTORS } from "../../../config/instructors";
 const rawApiUrl = import.meta.env.VITE_API_URL;
 const API_URL = rawApiUrl
   ? rawApiUrl.endsWith("/api/v1")
     ? rawApiUrl
     : `${rawApiUrl}/api/v1`
-  : "";
+  : "http://localhost:1201/api/v1";
 
 const request = async (url, options = {}) => {
   const response = await fetch(url, options);
-  const data = response.status === 204 ? null : await response.json();
+
+  const data = await response.json();
 
   if (!response.ok) {
-    throw new Error(data?.error?.message || data?.message || "Request failed");
+    console.log("API ERROR:", data);
+
+    throw new Error(
+      data.message || data.error?.message || JSON.stringify(data),
+    );
   }
 
   return data;
 };
 
-const decodeJwtPayload = (token) => {
-  try {
-    const payload = token.split(".")[1];
-    const normalized = payload.replace(/-/g, "+").replace(/_/g, "/");
-    return JSON.parse(atob(normalized));
-  } catch {
-    return {};
+export const loginService = async (email, password) => {
+  const response = await request(`${API_URL}/auth/login`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      email,
+      password,
+    }),
+  });
+
+  const tokenData = response.data || response;
+
+  const { accessToken, refreshToken } = tokenData;
+
+  localStorage.setItem("auth-token", accessToken);
+  localStorage.setItem("refreshToken", refreshToken);
+
+  const profileRes = await fetch(`${API_URL}/profile/me`, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+
+  const profileJson = await profileRes.json();
+
+  const profile = profileJson.data || profileJson;
+
+  const payload = JSON.parse(atob(accessToken.split(".")[1]));
+
+  const user = {
+    ...profile,
+    id: payload.sub || payload.userId || payload.id,
+  };
+  const instructorId = INSTRUCTORS[user.email];
+
+  if (instructorId) {
+    localStorage.setItem("instructorId", instructorId);
+  } else {
+    localStorage.removeItem("instructorId");
   }
-};
-
-const buildUserFromToken = (token, fallback = {}) => {
-  const claims = decodeJwtPayload(token);
-
   return {
-    id: claims.sub || fallback.id,
-    email: claims.email || fallback.email,
-    fullName: fallback.fullName || fallback.name || claims.email || fallback.email,
-    role: fallback.role || "user",
+    success: true,
+    token: accessToken,
+    user,
   };
 };
 
-export const loginService = async (email, password) => {
-  try {
-    const data = await request(`${API_URL}/auth/login`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email, password }),
-    });
+export const signupService = async (formData) => {
+  await request(`${API_URL}/auth/register`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      email: formData.email,
+      password: formData.password,
+      fullName: formData.username || formData.fullName || "",
+    }),
+  });
 
-    if (data.refreshToken) {
-      localStorage.setItem("refresh-token", data.refreshToken);
-    }
-
-    return {
-      success: true,
-      token: data.accessToken,
-      refreshToken: data.refreshToken,
-      user: buildUserFromToken(data.accessToken, { email }),
-    };
-  } catch (error) {
-    return {
-      success: false,
-      message: error.message || "Invalid email or password",
-    };
-  }
+  // Sau khi đăng ký, tự động login luôn
+  return await loginService(formData.email, formData.password);
 };
 
-export const signupService = async (formData) => {
-  try {
-    const registeredUser = await request(`${API_URL}/auth/register`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        email: formData.email,
-        password: formData.password,
-        fullName: formData.fullName || formData.username,
-      }),
-    });
+export const logoutService = async () => {
+  const refreshToken = localStorage.getItem("refreshToken");
 
-    const loginResult = await loginService(formData.email, formData.password);
-
-    if (!loginResult.success) {
-      return loginResult;
+  if (refreshToken) {
+    try {
+      await fetch(`${API_URL}/auth/logout`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("auth-token")}`,
+        },
+        body: JSON.stringify({ refreshToken }),
+      });
+    } catch {
+      // Bỏ qua lỗi logout
     }
-
-    return {
-      ...loginResult,
-      user: {
-        ...loginResult.user,
-        id: loginResult.user.id || registeredUser.id,
-        fullName: registeredUser.name || loginResult.user.fullName,
-      },
-    };
-  } catch (error) {
-    return {
-      success: false,
-      message: error.message || "Sign up failed",
-    };
   }
+
+  localStorage.removeItem("auth-token");
+  localStorage.removeItem("accessToken");
+  localStorage.removeItem("refreshToken");
+  localStorage.removeItem("user");
 };

@@ -1,0 +1,74 @@
+.search-page {
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 100px 40px;
+}
+
+.search-title {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 30px;
+  color: #111827;
+}
+
+.search-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 24px;
+}
+
+.search-card {
+  background: white;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid #eee;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+  transition: 0.25s;
+  cursor: pointer;
+}
+
+.search-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12);
+}
+
+.search-card img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+.search-body {
+  padding: 20px;
+}
+
+.search-category {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #f3f4f6;
+  font-size: 12px;
+  color: #6b7280;
+  margin-bottom: 12px;
+}
+
+.search-name {
+  font-size: 20px;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 10px;
+}
+
+.search-desc {
+  color: #6b7280;
+  line-height: 1.6;
+  font-size: 14px;
+  min-height: 65px;
+}
+
+.search-price {
+  margin-top: 18px;
+  font-size: 24px;
+  font-weight: 800;
+  color: #ef4444;
+}

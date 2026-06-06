@@ -1,15 +1,16 @@
 const InstructorSection = ({ authUser, formData, changeHandler, editing }) => {
-  if (authUser.role !== "instructor") return null;
+  // SỬA Ở ĐÂY: Dùng isInstructor
+  if (!authUser?.isInstructor) return null;
 
   return (
     <div className="form-section instructor-section">
-      <h3>Thông tin học viên</h3>
-
+      <h3>Thông tin chuyên môn giảng viên</h3>
       <input
         name="expertise"
-        value={formData.expertise}
+        value={formData.expertise || ""}
         onChange={changeHandler}
         disabled={!editing}
+        placeholder="Ví dụ: Backend Developer, Data Scientist..."
       />
     </div>
   );

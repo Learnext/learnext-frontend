@@ -3,10 +3,6 @@ import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import "../styles/InstructorSidebar.css";
 
-// ─── FIX #6: Bỏ link /instructor/upload bị thừa ──────────────
-// UC05 (tạo khóa học) đã được handle trong /instructor/courses
-// Không có route /instructor/upload nên bỏ để tránh 404
-
 const InstructorSidebar = () => {
   const location = useLocation();
 

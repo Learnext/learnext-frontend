@@ -47,7 +47,13 @@ const LoginSignup = () => {
         alert("Đăng ký thành công!");
       }
 
-      navigate("/");
+      const redirectPath = localStorage.getItem("redirect-after-login");
+      if (redirectPath) {
+        localStorage.removeItem("redirect-after-login");
+        navigate(redirectPath);
+      } else {
+        navigate("/");
+      }
     } catch (err) {
       setError(err.message || "Không thể kết nối server");
     } finally {

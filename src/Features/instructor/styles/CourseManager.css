@@ -198,16 +198,6 @@
   background: #e0ebff;
 }
 
-.btn-action.btn-publish {
-  color: #2e7d32;
-  border-color: #b7e4c7;
-  background: #f0faf2;
-}
-
-.btn-action.btn-publish:hover {
-  background: #e8f5e9;
-}
-
 .btn-action.btn-delete {
   color: #c0392b;
   border-color: #f5c6c2;

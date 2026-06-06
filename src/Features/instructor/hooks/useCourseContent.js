@@ -13,7 +13,13 @@ import {
   deleteLessonService,
 } from "../services/instructorService";
 
-const EMPTY_LESSON = { title: "", type: "video", file: null, fileName: "" };
+const EMPTY_LESSON = {
+  title: "",
+  type: "video",
+  file: null,
+  fileName: "",
+  videoUrl: "",
+};
 
 export const useCourseContent = (courseId) => {
   const [chapters, setChapters] = useState([]);
@@ -162,7 +168,7 @@ export const useCourseContent = (courseId) => {
           setChapters((prev) =>
             prev.map((c) =>
               c.id === modal.chapterId
-                ? { ...c, sections: [...c.sections, data.section] }
+                ? { ...c, sections: [...(c.sections || []), data.section] }
                 : c,
             ),
           );
@@ -202,8 +208,8 @@ export const useCourseContent = (courseId) => {
       setFormError("Vui lòng nhập tên bài học");
       return;
     }
-    if (!modal.editing && !formData.file) {
-      setFormError("Vui lòng chọn file");
+    if (!modal.editing && !formData.file && !formData.videoUrl) {
+      setFormError("Vui lòng upload file hoặc nhập URL");
       return;
     }
     setFormLoading(true);
@@ -255,7 +261,7 @@ export const useCourseContent = (courseId) => {
                     ...c,
                     sections: c.sections.map((s) =>
                       s.id === modal.sectionId
-                        ? { ...s, lessons: [...s.lessons, data.lesson] }
+                        ? { ...s, lessons: [...(s.lessons || []), data.lesson] }
                         : s,
                     ),
                   }

@@ -1,4 +1,5 @@
 import React from "react";
+import InstructorSection from "./InstructorSection";
 
 const ProfileForm = ({
   authUser,
@@ -17,9 +18,10 @@ const ProfileForm = ({
         <div className="form-row">
           <div className="form-group">
             <label>Họ và tên</label>
+            {/* Đổi name thành fullName */}
             <input
-              name="username"
-              value={formData.username}
+              name="fullName"
+              value={formData.fullName}
               onChange={changeHandler}
               disabled={!editing}
             />
@@ -52,6 +54,14 @@ const ProfileForm = ({
           />
         </div>
       </div>
+
+      {/* Hiển thị form cho Giảng viên */}
+      <InstructorSection
+        authUser={authUser}
+        formData={formData}
+        changeHandler={changeHandler}
+        editing={editing}
+      />
 
       {editing && (
         <div className="form-actions">

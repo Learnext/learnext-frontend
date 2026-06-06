@@ -22,13 +22,12 @@ const CourseManager = () => {
     setDeleteConfirm,
     changeHandler,
     handleThumbnail,
-    handleIntroVideo,
     openCreate,
     openEdit,
     handleCreate,
     handleEdit,
     handleDelete,
-    handlePublish,
+    togglePublish,
   } = useCourseManager();
 
   if (!isAllowed) return null;
@@ -59,7 +58,7 @@ const CourseManager = () => {
               courses={courses}
               onEdit={openEdit}
               onDelete={setDeleteConfirm}
-              onPublish={handlePublish}
+              onTogglePublish={togglePublish}
             />
           )}
         </div>
@@ -86,7 +85,6 @@ const CourseManager = () => {
         formSuccess={formSuccess}
         changeHandler={changeHandler}
         handleThumbnail={handleThumbnail}
-        handleIntroVideo={handleIntroVideo}
         onSubmit={view === "create" ? handleCreate : handleEdit}
         onCancel={() => setView("list")}
       />

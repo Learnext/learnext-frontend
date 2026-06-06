@@ -1,49 +1,72 @@
 .newsletter {
-  width: 65%;
-  height: 40vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  margin: auto;
-  padding: 0px 140px;
-  margin-bottom: 150px;
-  background: linear-gradient(180deg, #fde1ff 0%, #e1ffea22 60%);
-  gap: 30px;
-}
-.newsletter h1 {
-  font-size: 55px;
-  font-weight: 600;
-  color: #454545;
-}
-.newsletter p {
-  font-size: 20px;
-  color: #454545;
-}
-.newsletter div {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 730px;
-  height: 70px;
-  border-radius: 80px;
-  border: 1px solid #e3e3e3;
-}
-.newsletter input {
-  width: 500px;
-  margin-left: 30px;
-  border: none;
-  outline: none;
-  color: #616161;
-  font-family: "Poppins", sans-serif;
-  font-size: 16px;
-}
-.newsletter div button {
-  width: 210px;
-  height: 70px;
-  border-radius: 80px;
-  background: black;
+  margin: 120px auto;
+  max-width: 1300px;
+  padding: 80px;
+  border-radius: 32px;
+
+  background: linear-gradient(135deg, #ef4444, #f97316);
+
   color: white;
-  font-size: 16px;
+  text-align: center;
+}
+
+.newsletter-content {
+  max-width: 800px;
+  margin: auto;
+}
+
+.newsletter-tag {
+  display: inline-block;
+  padding: 8px 18px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+.newsletter h2 {
+  font-size: 42px;
+  font-weight: 800;
+  margin-bottom: 20px;
+}
+
+.newsletter p {
+  font-size: 18px;
+  opacity: 0.9;
+  margin-bottom: 35px;
+}
+
+.newsletter-form {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.newsletter-form input {
+  width: 420px;
+  height: 58px;
+  border: none;
+  border-radius: 14px;
+  padding: 0 20px;
+  font-size: 15px;
+}
+
+.newsletter-form button {
+  height: 58px;
+  border: none;
+  border-radius: 14px;
+  padding: 0 28px;
+  font-weight: 700;
   cursor: pointer;
+  background: white;
+  color: #ef4444;
+}
+
+.newsletter-form button:hover {
+  transform: translateY(-2px);
+}
+.newsletter h2 {
+  font-family: "Poppins", sans-serif;
+  font-weight: 700;
 }
