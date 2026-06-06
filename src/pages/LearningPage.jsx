@@ -44,8 +44,24 @@ const LearningPage = () => {
 
           if (accessJson.success && accessJson.data?.access === true) {
             setHasBought(true);
-            // BE chưa có endpoint lesson content
-            // Khi BE implement: fetch lessons ở đây
+            const lessonsRes = await fetch(
+              `${API}/learning/courses/${courseId}/lessons`,
+              { headers: { Authorization: `Bearer ${token}` } },
+            );
+            const lessonsJson = await lessonsRes.json();
+            if (lessonsJson.success) {
+              const loadedLessons = lessonsJson.data || [];
+              setLessons(loadedLessons);
+
+              const lastLessonId = localStorage.getItem(
+                `lastLesson-${courseId}`,
+              );
+              setCurrentLesson(
+                loadedLessons.find((lesson) => lesson.id === lastLessonId) ||
+                  loadedLessons[0] ||
+                  null,
+              );
+            }
           }
         }
       } catch (err) {
@@ -112,7 +128,7 @@ const LearningPage = () => {
     );
   }
 
-  // Đã mua nhưng BE chưa có lesson content
+  // Đã mua nhưng instructor chưa có lesson content
   if (lessons.length === 0) {
     return (
       <div className="learning-page" style={{ justifyContent: "center" }}>

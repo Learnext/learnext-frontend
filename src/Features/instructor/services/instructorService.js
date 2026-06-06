@@ -1,4 +1,5 @@
 import { INSTRUCTORS } from "../../../config/instructors";
+
 const rawApiUrl = import.meta.env.VITE_API_URL;
 
 const API_URL = rawApiUrl
@@ -20,8 +21,6 @@ export const instructorHeaders = (isJson = false) => {
   const instructorId =
     INSTRUCTORS[user.email] || localStorage.getItem("instructorId") || "";
 
-  console.log("Email:", user.email, "→ X-Instructor-Id:", instructorId);
-
   return {
     "X-Instructor-Id": instructorId,
     ...(isJson && { "Content-Type": "application/json" }),
@@ -34,14 +33,69 @@ const fetchApi = async (url, options = {}) => {
     const err = await res.text();
     throw new Error(`HTTP ${res.status}: ${err}`);
   }
+
+  if (res.status === 204) {
+    return null;
+  }
+
   const json = await res.json();
-  // BE trả về { success, data } hoặc trực tiếp object
   return json?.data !== undefined ? json.data : json;
 };
 
-//
-// DASHBOARD
-//
+const contentTypeByExtension = {
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".png": "image/png",
+  ".webp": "image/webp",
+  ".mp4": "video/mp4",
+  ".pdf": "application/pdf",
+};
+
+const getUploadContentType = (file) => {
+  if (file.type) {
+    return file.type;
+  }
+
+  const lowerName = file.name.toLowerCase();
+  const extension = Object.keys(contentTypeByExtension).find((ext) =>
+    lowerName.endsWith(ext),
+  );
+
+  return extension ? contentTypeByExtension[extension] : "";
+};
+
+const uploadFile = async (file) => {
+  if (!file || !API_URL) {
+    return null;
+  }
+
+  const contentType = getUploadContentType(file);
+
+  const signed = await fetchApi(`${API_URL}/uploads/signed-url`, {
+    method: "POST",
+    headers: authHeaders(true),
+    body: JSON.stringify({
+      fileName: file.name,
+      contentType,
+      size: file.size,
+    }),
+  });
+
+  const uploadResponse = await fetch(signed.uploadUrl, {
+    method: "PUT",
+    headers: {
+      "Content-Type": contentType,
+    },
+    body: file,
+  });
+
+  if (!uploadResponse.ok) {
+    const errorText = await uploadResponse.text();
+    throw new Error(`UPLOAD_FAILED ${uploadResponse.status}: ${errorText}`);
+  }
+
+  return signed.publicUrl;
+};
 
 export const fetchStatsService = async () => {
   try {
@@ -67,10 +121,6 @@ export const fetchStatsService = async () => {
   }
 };
 
-//
-// COURSES
-//
-
 export const fetchCoursesService = async () => {
   const courses = await fetchApi(`${API_URL}/instructor/courses`, {
     headers: instructorHeaders(),
@@ -80,12 +130,14 @@ export const fetchCoursesService = async () => {
 };
 
 export const createCourseService = async (formData) => {
+  const uploadedThumbnailUrl = await uploadFile(formData.thumbnail);
+
   const payload = {
     title: formData.title,
     description: formData.description || "",
     price: Number(formData.price) || 0,
     category: formData.category,
-    thumbnailUrl: formData.thumbnailUrl || "",
+    thumbnailUrl: uploadedThumbnailUrl || formData.thumbnailUrl || "",
     previewVideoUrl: formData.previewVideoUrl || "",
   };
 
@@ -99,17 +151,23 @@ export const createCourseService = async (formData) => {
 };
 
 export const updateCourseService = async (courseId, formData) => {
+  const uploadedThumbnailUrl = await uploadFile(formData.thumbnail);
+
   const payload = {
     title: formData.title,
     description: formData.description || "",
     price: Number(formData.price) || 0,
     category: formData.category,
-    thumbnailUrl: formData.thumbnailUrl || formData.thumbnailPreview || "",
+    thumbnailUrl:
+      uploadedThumbnailUrl ||
+      formData.thumbnailUrl ||
+      formData.thumbnailPreview ||
+      "",
     previewVideoUrl: formData.previewVideoUrl || null,
   };
 
   const course = await fetchApi(`${API_URL}/instructor/courses/${courseId}`, {
-    method: "PUT", // BE dùng PUT không phải PATCH
+    method: "PUT",
     headers: instructorHeaders(true),
     body: JSON.stringify(payload),
   });
@@ -127,7 +185,6 @@ export const deleteCourseService = async (courseId) => {
 };
 
 export const togglePublishService = async (courseId) => {
-  // BE dùng PATCH /instructor/courses/{courseId}/publish
   const course = await fetchApi(
     `${API_URL}/instructor/courses/${courseId}/publish`,
     {
@@ -139,9 +196,152 @@ export const togglePublishService = async (courseId) => {
   return { success: true, course };
 };
 
-//
-// ORDERS (user)
-//
+export const fetchContentService = async (courseId) => {
+  const chapters = await fetchApi(
+    `${API_URL}/instructor/courses/${courseId}/content`,
+    { headers: instructorHeaders() },
+  );
+
+  return { success: true, chapters };
+};
+
+export const createChapterService = async (courseId, title) => {
+  const chapter = await fetchApi(
+    `${API_URL}/instructor/courses/${courseId}/content/chapters`,
+    {
+      method: "POST",
+      headers: instructorHeaders(true),
+      body: JSON.stringify({ title }),
+    },
+  );
+
+  return { success: true, chapter };
+};
+
+export const updateChapterService = async (courseId, chapterId, title) => {
+  const chapter = await fetchApi(
+    `${API_URL}/instructor/courses/${courseId}/content/chapters/${chapterId}`,
+    {
+      method: "PATCH",
+      headers: instructorHeaders(true),
+      body: JSON.stringify({ title }),
+    },
+  );
+
+  return { success: true, chapter };
+};
+
+export const deleteChapterService = async (courseId, chapterId) => {
+  await fetchApi(
+    `${API_URL}/instructor/courses/${courseId}/content/chapters/${chapterId}`,
+    {
+      method: "DELETE",
+      headers: instructorHeaders(),
+    },
+  );
+
+  return { success: true };
+};
+
+export const createSectionService = async (courseId, chapterId, title) => {
+  const section = await fetchApi(
+    `${API_URL}/instructor/courses/${courseId}/content/chapters/${chapterId}/sections`,
+    {
+      method: "POST",
+      headers: instructorHeaders(true),
+      body: JSON.stringify({ title }),
+    },
+  );
+
+  return { success: true, section };
+};
+
+export const updateSectionService = async (
+  courseId,
+  chapterId,
+  sectionId,
+  title,
+) => {
+  const section = await fetchApi(
+    `${API_URL}/instructor/courses/${courseId}/content/chapters/${chapterId}/sections/${sectionId}`,
+    {
+      method: "PATCH",
+      headers: instructorHeaders(true),
+      body: JSON.stringify({ title }),
+    },
+  );
+
+  return { success: true, section };
+};
+
+export const deleteSectionService = async (courseId, chapterId, sectionId) => {
+  await fetchApi(
+    `${API_URL}/instructor/courses/${courseId}/content/chapters/${chapterId}/sections/${sectionId}`,
+    {
+      method: "DELETE",
+      headers: instructorHeaders(),
+    },
+  );
+
+  return { success: true };
+};
+
+const lessonPayload = async (formData) => {
+  const uploadedUrl = await uploadFile(formData.file);
+  const type = formData.type || "video";
+  const fileUrl = uploadedUrl || formData.file || formData.fileName || "";
+
+  return {
+    title: formData.title,
+    type,
+    videoUrl: type === "video" ? formData.videoUrl || fileUrl : "",
+    documentUrl: type === "pdf" ? fileUrl : "",
+    file: fileUrl,
+  };
+};
+
+export const createLessonService = async (courseId, sectionId, formData) => {
+  const lesson = await fetchApi(
+    `${API_URL}/instructor/courses/${courseId}/content/sections/${sectionId}/lessons`,
+    {
+      method: "POST",
+      headers: instructorHeaders(true),
+      body: JSON.stringify(await lessonPayload(formData)),
+    },
+  );
+
+  return { success: true, lesson };
+};
+
+export const updateLessonService = async (
+  courseId,
+  sectionId,
+  lessonId,
+  formData,
+) => {
+  const lesson = await fetchApi(
+    `${API_URL}/instructor/courses/${courseId}/content/sections/${sectionId}/lessons/${lessonId}`,
+    {
+      method: "PATCH",
+      headers: instructorHeaders(true),
+      body: JSON.stringify(await lessonPayload(formData)),
+    },
+  );
+
+  return { success: true, lesson };
+};
+
+export const deleteLessonService = async (courseId, sectionId, lessonId) => {
+  await fetchApi(
+    `${API_URL}/instructor/courses/${courseId}/content/sections/${sectionId}/lessons/${lessonId}`,
+    {
+      method: "DELETE",
+      headers: instructorHeaders(),
+    },
+  );
+
+  return { success: true };
+};
 
 export const fetchOrdersService = async () => {
   const orders = await fetchApi(`${API_URL}/orders`, {
@@ -161,7 +361,6 @@ export const createOrderService = async (courseId) => {
   return { success: true, order };
 };
 
-// Sai — BE nhận multipart/form-data
 export const submitPaymentProofService = async (orderId, proofFile) => {
   const token = localStorage.getItem("auth-token");
   const formData = new FormData();
@@ -170,7 +369,6 @@ export const submitPaymentProofService = async (orderId, proofFile) => {
   const res = await fetch(`${API_URL}/orders/${orderId}/proof`, {
     method: "POST",
     headers: { Authorization: `Bearer ${token}` },
-    // KHÔNG set Content-Type — browser tự set boundary
     body: formData,
   });
 
@@ -178,10 +376,6 @@ export const submitPaymentProofService = async (orderId, proofFile) => {
   if (!res.ok) throw new Error(json?.error?.message || "Upload failed");
   return { success: true, order: json.data };
 };
-
-//
-// ENROLLMENTS
-//
 
 export const fetchEnrollmentsService = async () => {
   const enrollments = await fetchApi(`${API_URL}/learning/enrollments`, {
@@ -210,10 +404,6 @@ export const completeLessonService = async (courseId, lessonId) => {
   return { success: true };
 };
 
-//
-// FAVORITES
-//
-
 export const fetchFavoritesService = async () => {
   const favorites = await fetchApi(`${API_URL}/favorites`, {
     headers: authHeaders(),
@@ -240,10 +430,6 @@ export const removeFavoriteService = async (courseId) => {
   return { success: true };
 };
 
-//
-// REVIEWS & COMMENTS
-//
-
 export const createReviewService = async (courseId, rating, content) => {
   const review = await fetchApi(`${API_URL}/courses/${courseId}/reviews`, {
     method: "POST",
@@ -264,10 +450,6 @@ export const createCommentService = async (courseId, content) => {
   return { success: true, comment };
 };
 
-//
-// ACTIVATION
-//
-
 export const activateCourseService = async (activationCode) => {
   const data = await fetchApi(`${API_URL}/activations/activate`, {
     method: "POST",
@@ -277,10 +459,6 @@ export const activateCourseService = async (activationCode) => {
 
   return { success: true, ...data };
 };
-
-//
-// PUBLIC COURSES
-//
 
 export const fetchPublicCoursesService = async (params = {}) => {
   const query = new URLSearchParams();

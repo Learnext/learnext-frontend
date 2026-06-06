@@ -158,7 +158,7 @@ const CourseForm = ({
               <input
                 id="thumbnail-input"
                 type="file"
-                accept="image/*"
+                accept="image/jpeg,image/png,image/webp"
                 onChange={handleThumbnail}
                 style={{ display: "none" }}
               />
