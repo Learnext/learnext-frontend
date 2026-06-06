@@ -314,13 +314,11 @@ export const publishCourseService = async (courseId) => {
 //
 
 export const fetchContentService = async () => {
-  const chapters = await fetchApi(`${API_URL}/content`, {
-    headers: authHeaders(),
-  });
+  await delay();
 
   return {
     success: true,
-    chapters,
+    chapters: FAKE_CONTENT,
   };
 };
 
@@ -329,112 +327,107 @@ export const fetchContentService = async () => {
 //
 
 export const createChapterService = async (_, title) => {
-  if (!API_URL) {
-    await delay();
+  await delay();
 
-    return {
-      success: true,
-      chapter: {
-        id: Date.now(),
-        title,
-        order: 1,
-        sections: [],
-      },
-    };
-  }
-
-  return fetchApi(`${API_URL}/chapters`, {
-    method: "POST",
-    headers: authHeaders(true),
-    body: JSON.stringify({
+  return {
+    success: true,
+    chapter: {
+      id: Date.now(),
       title,
       order: 1,
       sections: [],
-    }),
-  });
+    },
+  };
 };
 
-export const updateChapterService = async (_, chapterId, title) =>
-  fetchApi(`${API_URL}/chapters/${chapterId}`, {
-    method: "PUT",
-    headers: authHeaders(true),
-    body: JSON.stringify({ title }),
-  });
+export const updateChapterService = async (_, chapterId, title) => {
+  await delay();
 
-export const deleteChapterService = async (_, chapterId) =>
-  fetchApi(`${API_URL}/chapters/${chapterId}`, {
-    method: "DELETE",
-    headers: authHeaders(),
-  });
+  return {
+    success: true,
+    chapter: {
+      id: chapterId,
+      title,
+    },
+  };
+};
+
+export const deleteChapterService = async () => {
+  await delay();
+
+  return { success: true };
+};
 
 //
 // SECTION
 //
 
-export const createSectionService = async (_, __, title) =>
-  fetchApi(`${API_URL}/sections`, {
-    method: "POST",
-    headers: authHeaders(true),
-    body: JSON.stringify({
+export const createSectionService = async (_, __, title) => {
+  await delay();
+
+  return {
+    success: true,
+    section: {
+      id: Date.now(),
       title,
       order: 1,
       lessons: [],
-    }),
-  });
+    },
+  };
+};
 
-export const updateSectionService = async (_, __, sectionId, title) =>
-  fetchApi(`${API_URL}/sections/${sectionId}`, {
-    method: "PUT",
-    headers: authHeaders(true),
-    body: JSON.stringify({ title }),
-  });
+export const updateSectionService = async (_, __, sectionId, title) => {
+  await delay();
 
-export const deleteSectionService = async (_, __, sectionId) =>
-  fetchApi(`${API_URL}/sections/${sectionId}`, {
-    method: "DELETE",
-    headers: authHeaders(),
-  });
+  return {
+    success: true,
+    section: {
+      id: sectionId,
+      title,
+    },
+  };
+};
+
+export const deleteSectionService = async () => {
+  await delay();
+
+  return { success: true };
+};
 
 //
 // LESSON
 //
 
 export const createLessonService = async (_, __, formData) => {
-  const payload = new FormData();
+  await delay();
 
-  payload.append("title", formData.title);
-  payload.append("type", formData.type);
-
-  if (formData.file) {
-    payload.append("file", formData.file);
-  }
-
-  return fetchApi(`${API_URL}/lessons`, {
-    method: "POST",
-    headers: authHeaders(),
-    body: payload,
-  });
+  return {
+    success: true,
+    lesson: {
+      id: Date.now(),
+      title: formData.title,
+      type: formData.type,
+      file: formData.file?.name || null,
+    },
+  };
 };
 
 export const updateLessonService = async (_, __, lessonId, formData) => {
-  const payload = new FormData();
+  await delay();
 
-  payload.append("title", formData.title);
-  payload.append("type", formData.type);
-
-  if (formData.file) {
-    payload.append("file", formData.file);
-  }
-
-  return fetchApi(`${API_URL}/lessons/${lessonId}`, {
-    method: "PUT",
-    headers: authHeaders(),
-    body: payload,
-  });
+  return {
+    success: true,
+    lesson: {
+      id: lessonId,
+      title: formData.title,
+      type: formData.type,
+      file: formData.file?.name || null,
+    },
+  };
 };
 
-export const deleteLessonService = async (_, __, lessonId) =>
-  fetchApi(`${API_URL}/lessons/${lessonId}`, {
-    method: "DELETE",
-    headers: authHeaders(),
-  });
+export const deleteLessonService = async () => {
+  await delay();
+
+  return { success: true };
+};
