@@ -56,7 +56,6 @@ const Navbar = () => {
     return unique.map((cat) => ({
       id: cat,
       name: cat,
-
       groups: courses
         .filter((c) => c.categoryName === cat)
         .map((course) => ({
@@ -102,6 +101,9 @@ const Navbar = () => {
     navigate(`/search?q=${encodeURIComponent(keyword)}`);
     setKeyword("");
   };
+
+  // Xác định xem user có phải là giảng viên không
+  const isInstructor = Boolean(localStorage.getItem("instructorId"));
 
   return (
     <div className="navbar">
@@ -178,9 +180,7 @@ const Navbar = () => {
         <Link to="/cart">
           <button className="login-btn">Giỏ hàng</button>
         </Link>
-        <ul className="nav-menu">
-          {/* Nút Hỗ trợ hiển thị ở ngoài CHO KHÁCH CHƯA ĐĂNG NHẬP */}
-        </ul>
+        <ul className="nav-menu"></ul>
 
         {user ? (
           <div className="nav-avatar-wrapper" ref={dropdownRef}>
@@ -195,20 +195,25 @@ const Navbar = () => {
             {/* Dropdown */}
             {dropdownOpen && (
               <div className="nav-dropdown">
-                <Link to="/my-courses" onClick={() => setDropdownOpen(false)}>
-                  <div className="nav-dropdown-item">Khóa học của tôi</div>
-                </Link>
-
+                {/* 4 Mục dùng chung cho TẤT CẢ (Giảng viên cũng có thể đi học, mua khóa học khác) */}
                 <Link to="/profile" onClick={() => setDropdownOpen(false)}>
                   <div className="nav-dropdown-item">Trang cá nhân</div>
+                </Link>
+
+                <Link to="/my-courses" onClick={() => setDropdownOpen(false)}>
+                  <div className="nav-dropdown-item">Khóa học của tôi</div>
                 </Link>
 
                 <Link to="/invoices" onClick={() => setDropdownOpen(false)}>
                   <div className="nav-dropdown-item">Hóa đơn</div>
                 </Link>
 
-                {/* Da la giang vien -> hien Dashboard; chua -> hien Dang ky */}
-                {localStorage.getItem("instructorId") ? (
+                <Link to="/support" onClick={() => setDropdownOpen(false)}>
+                  <div className="nav-dropdown-item">Hỗ trợ</div>
+                </Link>
+
+                {/* Phân biệt: Nếu là GV thì hiện nút vào Dashboard, chưa phải thì hiện nút Đăng ký */}
+                {isInstructor ? (
                   <Link to="/instructor" onClick={() => setDropdownOpen(false)}>
                     <div className="nav-dropdown-item">
                       Dashboard giảng viên
@@ -222,11 +227,6 @@ const Navbar = () => {
                     <div className="nav-dropdown-item">Đăng ký giảng viên</div>
                   </Link>
                 )}
-
-                {/* ĐÃ CHUYỂN: Nút Hỗ trợ hiển thị trong Dropdown CHO USER */}
-                <Link to="/support" onClick={() => setDropdownOpen(false)}>
-                  <div className="nav-dropdown-item">Hỗ trợ</div>
-                </Link>
 
                 <hr className="nav-dropdown-hr" />
 
