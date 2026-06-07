@@ -61,17 +61,16 @@ const ContentModal = ({
                   <option value="pdf">📄 PDF</option>{" "}
                 </select>{" "}
               </div>
-              ```
               {/* URL video */}
               {formData.type === "video" && (
                 <div className="form-group">
-                  <label>URL Video (Youtube, Vimeo, MP4...)</label>
+                  <label>URL Video (YouTube, Vimeo, MP4, WebM...)</label>
                   <input
                     type="text"
                     name="videoUrl"
                     value={formData.videoUrl || ""}
                     onChange={changeHandler}
-                    placeholder="https://..."
+                    placeholder="https://www.youtube.com/watch?v=..."
                   />
                 </div>
               )}
@@ -101,13 +100,14 @@ const ContentModal = ({
                   id="lesson-file"
                   type="file"
                   accept={
-                    formData.type === "video" ? "video/*" : "application/pdf"
+                    formData.type === "video"
+                      ? "video/mp4,video/webm,video/ogg,video/quicktime,video/x-m4v,video/x-msvideo,video/x-matroska,.mkv,.avi,.mov,.m4v,.ogv"
+                      : "application/pdf"
                   }
                   onChange={handleFile}
                   style={{ display: "none" }}
                 />
               </div>
-              ```
             </>
           )}
 

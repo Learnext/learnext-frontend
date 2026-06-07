@@ -1,9 +1,40 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../Features/auth/context/AuthContext";
+import { getVideoSource } from "../utils/video";
 import "./CSS/LearningPage.css";
 
 const API = "http://localhost:1201/api/v1";
+
+const VideoPlayer = ({ url, title, onEnded }) => {
+  const source = getVideoSource(url);
+
+  if (!source.src) {
+    return null;
+  }
+
+  if (source.type === "embed") {
+    return (
+      <iframe
+        src={source.src}
+        title={title || "video-player"}
+        className="lesson-video lesson-video-frame"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        referrerPolicy="strict-origin-when-cross-origin"
+        allowFullScreen
+      />
+    );
+  }
+
+  return (
+    <video
+      controls
+      src={source.src}
+      onEnded={onEnded}
+      className="lesson-video"
+    />
+  );
+};
 
 const LearningPage = () => {
   const { courseId } = useParams();
@@ -274,10 +305,9 @@ const LearningPage = () => {
         <main className="learning-content" style={{ maxWidth: "800px" }}>
           <h1>Học thử: {courseTitle}</h1>
           {previewLesson?.videoUrl ? (
-            <video
-              controls
-              src={previewLesson.videoUrl}
-              className="lesson-video"
+            <VideoPlayer
+              url={previewLesson.videoUrl}
+              title={previewLesson.title || courseTitle}
             />
           ) : (
             <p>Không có video học thử.</p>
@@ -376,11 +406,10 @@ const LearningPage = () => {
             <h1>{currentLesson.title}</h1>
 
             {currentLesson.videoUrl ? (
-              <video
-                controls
-                src={currentLesson.videoUrl}
+              <VideoPlayer
+                url={currentLesson.videoUrl}
+                title={currentLesson.title}
                 onEnded={markCompleted}
-                className="lesson-video"
               />
             ) : currentLesson.documentUrl ? (
               <iframe

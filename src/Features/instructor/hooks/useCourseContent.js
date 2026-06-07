@@ -18,7 +18,31 @@ const EMPTY_LESSON = {
   type: "video",
   file: null,
   fileName: "",
+  existingFileUrl: "",
   videoUrl: "",
+  documentUrl: "",
+};
+
+const fileNameFromUrl = (url = "") => {
+  if (!url) return "";
+  try {
+    const parsed = new URL(url);
+    const name = parsed.pathname.split("/").filter(Boolean).pop();
+    return name ? decodeURIComponent(name) : url;
+  } catch {
+    return url;
+  }
+};
+
+const lessonInitialForm = (lesson) => {
+  const existingFileUrl = lesson.file || "";
+  return {
+    ...EMPTY_LESSON,
+    ...lesson,
+    file: null,
+    fileName: fileNameFromUrl(existingFileUrl),
+    existingFileUrl,
+  };
 };
 
 export const useCourseContent = (courseId) => {
@@ -63,7 +87,9 @@ export const useCourseContent = (courseId) => {
     setModal({ type, ...extra });
     setFormData(
       extra.editing
-        ? { ...extra.editing }
+        ? type === "lesson"
+          ? lessonInitialForm(extra.editing)
+          : { ...extra.editing }
         : type === "lesson"
           ? { ...EMPTY_LESSON }
           : { title: "" },
@@ -84,7 +110,12 @@ export const useCourseContent = (courseId) => {
   const handleFile = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    setFormData((prev) => ({ ...prev, file, fileName: file.name }));
+    setFormData((prev) => ({
+      ...prev,
+      file,
+      fileName: file.name,
+      existingFileUrl: "",
+    }));
   };
 
   // ─── CRUD Chapter ──────────────────────────────────────────
@@ -215,12 +246,20 @@ export const useCourseContent = (courseId) => {
     setFormLoading(true);
     try {
       if (modal.editing) {
-        await updateLessonService(
+        const data = await updateLessonService(
           courseId,
           modal.sectionId,
           modal.editing.id,
           formData,
         );
+        const updatedLesson = data.lesson || {
+          ...modal.editing,
+          title: formData.title,
+          type: formData.type,
+          videoUrl: formData.videoUrl,
+          documentUrl: formData.documentUrl,
+          file: formData.existingFileUrl,
+        };
         setChapters((prev) =>
           prev.map((c) =>
             c.id === modal.chapterId
@@ -232,12 +271,7 @@ export const useCourseContent = (courseId) => {
                           ...s,
                           lessons: s.lessons.map((l) =>
                             l.id === modal.editing.id
-                              ? {
-                                  ...l,
-                                  title: formData.title,
-                                  type: formData.type,
-                                  file: formData.fileName || l.file,
-                                }
+                              ? updatedLesson
                               : l,
                           ),
                         }

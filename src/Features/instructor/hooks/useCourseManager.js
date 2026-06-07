@@ -201,25 +201,19 @@ export const useCourseManager = () => {
 
       console.log(`[BƯỚC 2] API đã chạy xong! Kết quả:`, resData);
 
-      // Chủ động ép trạng thái đảo ngược lại (từ Đã đăng -> Nháp và ngược lại)
-      const currentStatus = course.status?.toUpperCase() || "";
-      const newStatus =
-        currentStatus === "PUBLISHED" || currentStatus === "ACTIVE"
-          ? "DRAFT"
-          : "PUBLISHED";
+      const updatedCourse = resData.course || course;
+      const newStatus = updatedCourse.status || course.status;
 
       setCourses((prev) =>
         prev.map((c) => {
           if (c.id === course.id) {
-            return { ...c, status: newStatus }; // Ghi đè trạng thái mới ngay lập tức
+            return { ...c, ...updatedCourse };
           }
           return c;
         }),
       );
 
-      notifySuccess(
-        `Đã đổi thành công sang: ${newStatus === "DRAFT" ? "NHÁP" : "ĐÃ ĐĂNG"}`,
-      );
+      notifySuccess(`Đã đổi trạng thái khóa học sang: ${newStatus}`);
     } catch (err) {
       console.error("[BƯỚC LỖI] Đã xảy ra lỗi hệ thống:", err);
       notifyError("Không thể kết nối hoặc backend từ chối. Xem Console F12.");

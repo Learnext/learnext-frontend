@@ -152,7 +152,10 @@ const ChapterList = ({
                                   </span>
 
                                   <span className="lesson-file">
-                                    {lesson.file || "Không có file"}
+                                    {lesson.file ||
+                                      lesson.videoUrl ||
+                                      lesson.documentUrl ||
+                                      "Không có file"}
                                   </span>
 
                                   {lesson.duration && (

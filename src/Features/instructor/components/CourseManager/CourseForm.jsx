@@ -185,10 +185,10 @@ const CourseForm = ({
               name="previewVideoUrl"
               value={formData.previewVideoUrl || ""}
               onChange={changeHandler}
-              placeholder="https://example.com/preview.mp4"
+              placeholder="https://www.youtube.com/watch?v=... hoặc https://example.com/preview.mp4"
             />
             <small className="form-hint">
-              Video ngắn giới thiệu khóa học (không bắt buộc)
+              Video ngắn giới thiệu khóa học (YouTube, Vimeo, MP4/WebM)
             </small>
           </div>
         </div>

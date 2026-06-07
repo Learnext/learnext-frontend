@@ -41,8 +41,21 @@ const contentTypeByExtension = {
   ".png": "image/png",
   ".webp": "image/webp",
   ".mp4": "video/mp4",
+  ".webm": "video/webm",
+  ".ogg": "video/ogg",
+  ".ogv": "video/ogg",
+  ".mov": "video/quicktime",
+  ".m4v": "video/x-m4v",
+  ".avi": "video/x-msvideo",
+  ".mkv": "video/x-matroska",
   ".pdf": "application/pdf",
 };
+
+const isUploadableFile = (file) =>
+  file &&
+  typeof file === "object" &&
+  typeof file.name === "string" &&
+  typeof file.size === "number";
 
 const getUploadContentType = (file) => {
   if (file.type) {
@@ -58,7 +71,7 @@ const getUploadContentType = (file) => {
 };
 
 const uploadFile = async (file) => {
-  if (!file || !API_URL) {
+  if (!isUploadableFile(file) || !API_URL) {
     return null;
   }
 
@@ -287,13 +300,19 @@ export const deleteSectionService = async (courseId, chapterId, sectionId) => {
 const lessonPayload = async (formData) => {
   const uploadedUrl = await uploadFile(formData.file);
   const type = formData.type || "video";
-  const fileUrl = uploadedUrl || formData.file || formData.fileName || "";
+  const existingFileUrl =
+    typeof formData.file === "string"
+      ? formData.file
+      : formData.existingFileUrl || "";
+  const fileUrl = uploadedUrl || existingFileUrl || "";
+  const videoUrl = uploadedUrl || formData.videoUrl || fileUrl;
+  const documentUrl = uploadedUrl || formData.documentUrl || fileUrl;
 
   return {
     title: formData.title,
     type,
-    videoUrl: type === "video" ? formData.videoUrl || fileUrl : "",
-    documentUrl: type === "pdf" ? fileUrl : "",
+    videoUrl: type === "video" ? videoUrl : "",
+    documentUrl: type === "pdf" ? documentUrl : "",
     file: fileUrl,
   };
 };

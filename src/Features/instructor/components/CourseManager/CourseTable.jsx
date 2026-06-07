@@ -2,6 +2,40 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
+const statusMeta = (status) => {
+  const currentStatus = status?.toUpperCase() || "DRAFT";
+
+  if (currentStatus === "PUBLISHED" || currentStatus === "ACTIVE") {
+    return {
+      label: "Đã đăng",
+      className: "status-published",
+      actionLabel: "Ẩn",
+    };
+  }
+
+  if (currentStatus === "PENDING_APPROVAL") {
+    return {
+      label: "Chờ duyệt",
+      className: "status-pending",
+      actionLabel: "Đăng",
+    };
+  }
+
+  if (currentStatus === "REJECTED") {
+    return {
+      label: "Bị từ chối",
+      className: "status-rejected",
+      actionLabel: "Đăng",
+    };
+  }
+
+  return {
+    label: "Nháp",
+    className: "status-draft",
+    actionLabel: "Đăng",
+  };
+};
+
 const CourseTable = ({ courses, onEdit, onDelete, onTogglePublish }) => {
   const navigate = useNavigate();
 
@@ -21,7 +55,7 @@ const CourseTable = ({ courses, onEdit, onDelete, onTogglePublish }) => {
         <tbody>
           {courses.map((course) => {
             // Đưa status về chữ in hoa để so sánh an toàn, tránh lỗi gõ nhầm hoa/thường từ Backend
-            const currentStatus = course.status?.toUpperCase();
+            const currentStatus = statusMeta(course.status);
 
             return (
               <tr key={course.id}>
@@ -42,16 +76,9 @@ const CourseTable = ({ courses, onEdit, onDelete, onTogglePublish }) => {
                 <td>{course.students}</td>
                 <td>
                   <span
-                    className={`status-badge ${
-                      currentStatus === "PUBLISHED" ||
-                      currentStatus === "ACTIVE"
-                        ? "status-published"
-                        : "status-draft"
-                    }`}
+                    className={`status-badge ${currentStatus.className}`}
                   >
-                    {currentStatus === "PUBLISHED" || currentStatus === "ACTIVE"
-                      ? "Đã đăng"
-                      : "Nháp"}
+                    {currentStatus.label}
                   </span>
                 </td>
                 <td>
@@ -70,10 +97,7 @@ const CourseTable = ({ courses, onEdit, onDelete, onTogglePublish }) => {
                       onClick={() => onTogglePublish(course)}
                     >
                       {/* Đã đồng bộ logic kiểm tra chữ in hoa */}
-                      {currentStatus === "PUBLISHED" ||
-                      currentStatus === "ACTIVE"
-                        ? "Ẩn"
-                        : "Đăng"}
+                      {currentStatus.actionLabel}
                     </button>
 
                     <button
